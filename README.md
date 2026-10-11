@@ -1,2 +1,2 @@
 # linux-notes
-Mis notas de Lnux
+Mis notas de Linux
