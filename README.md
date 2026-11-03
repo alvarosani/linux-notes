@@ -1,2 +1,2 @@
 # linux-notes
-Mis notas de Linux
+Mis notas de Linux creadas en Obsidian
