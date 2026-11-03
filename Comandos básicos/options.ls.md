@@ -1,0 +1,13 @@
+Volver > [[Linux Comandos Básicos]]
+-a muestra todos los archivos, incluidos ocultos como . y ..
+-A igual que -a pero sin mostrar . y ..
+-l se muestra en formato largo
+-h humanizado (se usa junto a -l)
+-1 muestra un archivo por línea
+-t ordenado por fecha de modificación
+-s ordenar por tamaño
+-R lista también el contenido de las subcarpetas
+-d muestra la carpeta, no su contenido
+-F añade un símbolo al nombre que lo identifica
+-i muestra el numero de inodo
+-r invierte el orden

@@ -1,0 +1,2946 @@
+/* ============================================================================
+   Lick — a macOS & iOS inspired theme for Obsidian
+   ----------------------------------------------------------------------------
+   Design goals:
+   • Feel native on macOS (desktop) and iOS/iPadOS (mobile & tablet)
+   • Full light + dark support built on Apple's system colour palette
+   • Borderless: separation comes from surface colour, spacing and shadow
+   • Translucency + blur for anything that floats above content
+   ========================================================================= */
+
+/* @settings
+
+name: Lick
+id: lick
+settings:
+    -
+        id: lick-about
+        title: About Lick
+        description: A clean and crisp theme inspired by Apple's design language. Feels right at home on macOS & iOS. Configure below.
+        type: heading
+        level: 1
+        collapsed: true
+    -
+        id: lick-appearance-heading
+        title: Appearance
+        type: heading
+        level: 1
+        collapsed: false
+    -
+        id: lick-flavour
+        title: Flavour
+        description: Recolours the whole theme. Default is Apple's system palette; Things and Graphite take their cues from the Things and Bear apps. Graphite uses a dark sidebar in light mode. Catppuccin uses the official Latte and Mocha palettes.
+        type: class-select
+        allowEmpty: false
+        default: lick-flavour-default
+        options:
+            -
+                label: Default
+                value: lick-flavour-default
+            -
+                label: Things
+                value: lick-flavour-things
+            -
+                label: Graphite
+                value: lick-flavour-graphite
+            -
+                label: Catppuccin — Latte / Mocha
+                value: lick-flavour-catppuccin
+    -
+        id: lick-font
+        title: Font
+        description: Inter ships with Obsidian. Sora needs to be installed on your device, and falls back to the system font if it isn't.
+        type: class-select
+        allowEmpty: false
+        default: lick-font-default
+        options:
+            -
+                label: Default — system
+                value: lick-font-default
+            -
+                label: Inter
+                value: lick-font-inter
+            -
+                label: Sora
+                value: lick-font-sora
+    -
+        id: lick-typography-heading
+        title: Headings
+        type: heading
+        level: 1
+        collapsed: false
+    -
+        id: lick-heading-colour
+        title: Coloured headings
+        description: Tint headings with the Apple system colour palette. Turn off for monochrome headings.
+        type: class-select
+        allowEmpty: false
+        default: lick-headings-coloured
+        options:
+            -
+                label: On
+                value: lick-headings-coloured
+            -
+                label: Off — monochrome
+                value: lick-headings-mono
+    -
+        id: lick-heading-indicator
+        title: Heading indicator
+        description: A marker shown in the margin beside each heading.
+        type: class-select
+        allowEmpty: false
+        default: lick-hi-none
+        options:
+            -
+                label: None
+                value: lick-hi-none
+            -
+                label: Dot
+                value: lick-hi-dot
+            -
+                label: Border
+                value: lick-hi-border
+    -
+        id: lick-editor-heading
+        title: Editor
+        type: heading
+        level: 1
+        collapsed: false
+    -
+        id: lick-checkbox-style
+        title: Checkbox style
+        description: Rectangle matches macOS, circular matches Reminders on iOS.
+        type: class-select
+        allowEmpty: false
+        default: lick-checkbox-rect
+        options:
+            -
+                label: Rectangle
+                value: lick-checkbox-rect
+            -
+                label: Circular
+                value: lick-checkbox-circle
+    -
+        id: lick-mobile-heading
+        title: Mobile
+        type: heading
+        level: 1
+        collapsed: false
+    -
+        id: lick-oled
+        title: True OLED black on mobile
+        description: Uses pure black backgrounds on phones and tablets in dark mode.
+        type: class-toggle
+        default: false
+
+*/
+
+/* ============================================================================
+   1. Apple system palette
+   ========================================================================= */
+
+body {
+  /* Apple system colours — light */
+  --apple-red: #ff3b30;
+  --apple-orange: #ff9500;
+  --apple-yellow: #ffcc00;
+  --apple-green: #34c759;
+  --apple-mint: #00c7be;
+  --apple-teal: #30b0c7;
+  --apple-cyan: #32ade6;
+  --apple-blue: #007aff;
+  --apple-indigo: #5856d6;
+  --apple-purple: #af52de;
+  --apple-pink: #ff2d55;
+  --apple-brown: #a2845e;
+
+  /* Accent — iOS/macOS system blue. Obsidian's own accent setting, if the
+     user changes it, is injected after this file and takes precedence. */
+  --accent-h: 211;
+  --accent-s: 100%;
+  --accent-l: 50%;
+
+  /* Type */
+  --font-interface-theme: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", "Helvetica Neue", "Inter", "Segoe UI Variable Text",
+    "Segoe UI", system-ui, sans-serif;
+  --font-text-theme: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "New York", "Helvetica Neue", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-monospace-theme: "SF Mono", ui-monospace, "JetBrains Mono", Menlo,
+    "Cascadia Mono", "Roboto Mono", monospace;
+
+  /* Radii — macOS Ventura/Sonoma & iOS card geometry */
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 14px;
+  --radius-xl: 20px;
+
+  /* Blur strength for translucent surfaces */
+  --lick-blur: saturate(180%) blur(30px);
+  --lick-blur-light: saturate(180%) blur(30px);
+
+  /* Motion */
+  --lick-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --anim-duration-fast: 100ms;
+  --anim-duration-moderate: 180ms;
+
+  --font-ui-smaller: 12px;
+  --font-ui-small: 13px;
+  --font-ui-medium: 15px;
+  --font-ui-large: 17px;
+
+  --line-height-normal: 1.6;
+  --line-height-tight: 1.3;
+  --file-line-width: 720px;
+
+  /* No lines anywhere by default */
+  --divider-width: 0px;
+  --divider-width-hover: 3px;
+  --tab-outline-width: 0px;
+  --modal-border-width: 0px;
+  --table-border-width: 0px;
+  --hr-thickness: 1px;
+  --embed-border-left: none;
+  --checkbox-radius: 5px;
+  --checkbox-size: 17px;
+  --toggle-radius: 16px;
+  --toggle-thumb-radius: 50%;
+  --input-radius: 8px;
+  --button-radius: 7px;
+  --swatch-radius: 50%;
+  --tag-radius: 6px;
+  --modal-radius: 14px;
+  --slider-track-height: 4px;
+  --slider-thumb-radius: 50%;
+  --icon-stroke: 1.75px;
+}
+
+/* ---------------------------------------------------------------- Light --- */
+
+.theme-light {
+  --color-base-00: #ffffff;
+  --color-base-05: #fcfcfd;
+  --color-base-10: #f7f7f9;
+  --color-base-20: #f0f0f3;
+  --color-base-25: #e9e9ed;
+  --color-base-30: #e1e1e6;
+  --color-base-35: #d8d8de;
+  --color-base-40: #cfcfd6;
+  --color-base-50: #aeaeb2;
+  --color-base-60: #8e8e93;
+  --color-base-70: #636366;
+  --color-base-100: #1d1d1f;
+
+  --color-red: var(--apple-red);
+  --color-orange: var(--apple-orange);
+  --color-yellow: #f0b400;
+  --color-green: var(--apple-green);
+  --color-cyan: var(--apple-teal);
+  --color-blue: var(--apple-blue);
+  --color-purple: var(--apple-purple);
+  --color-pink: var(--apple-pink);
+
+  --background-primary: var(--color-base-00);
+  --background-primary-alt: var(--color-base-10);
+  --background-secondary: var(--color-base-20);
+  --background-secondary-alt: var(--color-base-25);
+
+  --background-modifier-border: transparent;
+  --background-modifier-border-hover: transparent;
+  --background-modifier-border-focus: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.5);
+  --background-modifier-hover: rgba(0, 0, 0, 0.045);
+  --background-modifier-active-hover: rgba(0, 0, 0, 0.07);
+  --background-modifier-form-field: rgba(0, 0, 0, 0.045);
+  --background-modifier-message: rgba(0, 0, 0, 0.75);
+
+  --text-normal: #1d1d1f;
+  --text-muted: rgba(60, 60, 67, 0.68);
+  --text-faint: rgba(60, 60, 67, 0.42);
+  --text-on-accent: #ffffff;
+  --text-selection: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.22);
+  --text-highlight-bg: rgba(255, 214, 10, 0.45);
+
+  --interactive-normal: rgba(0, 0, 0, 0.04);
+  --interactive-hover: rgba(0, 0, 0, 0.08);
+
+  --divider-color: rgba(60, 60, 67, 0.16);
+  --scrollbar-thumb-bg: rgba(0, 0, 0, 0.18);
+  --scrollbar-active-thumb-bg: rgba(0, 0, 0, 0.32);
+
+  --hr-color: rgba(60, 60, 67, 0.16);
+  --code-background: rgba(0, 0, 0, 0.045);
+  --table-header-background: rgba(0, 0, 0, 0.035);
+  --table-row-alt-background: rgba(0, 0, 0, 0.022);
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-l: 0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --input-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  --input-shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.08);
+
+  /* Translucent chrome */
+  --lick-chrome: rgba(246, 246, 248, 0.72);
+  --lick-chrome-solid: #f0f0f3;
+  --lick-floating: rgba(255, 255, 255, 0.72);
+  --lick-elevated: #ffffff;
+  --lick-separator: rgba(60, 60, 67, 0.14);
+  --lick-fill: rgba(120, 120, 128, 0.12);
+  --lick-fill-strong: rgba(120, 120, 128, 0.2);
+
+  /* Cards resting on the page — see section 10. Separation is surface colour
+     only, so in light mode the card steps *down* from the white page rather
+     than floating above it. Base-20 is out: the Graphite flavour uses it for
+     its dark sidebar, so base-25 is the first tint that stays light
+     everywhere. */
+  --lick-card-background: var(--color-base-10);
+  --lick-card-background-hover: var(--color-base-25);
+}
+
+/* ----------------------------------------------------------------- Dark --- */
+
+.theme-dark {
+  --color-base-00: #1e1e20;
+  --color-base-05: #232326;
+  --color-base-10: #26262a;
+  --color-base-20: #161618;
+  --color-base-25: #2c2c2f;
+  --color-base-30: #3a3a3d;
+  --color-base-35: #434347;
+  --color-base-40: #4c4c50;
+  --color-base-50: #636366;
+  --color-base-60: #8e8e93;
+  --color-base-70: #aeaeb2;
+  --color-base-100: #f5f5f7;
+
+  --color-red: #ff453a;
+  --color-orange: #ff9f0a;
+  --color-yellow: #ffd60a;
+  --color-green: #30d158;
+  --color-cyan: #40c8e0;
+  --color-blue: #0a84ff;
+  --color-purple: #bf5af2;
+  --color-pink: #ff375f;
+
+  --accent-l: 52%;
+
+  --background-primary: var(--color-base-00);
+  --background-primary-alt: var(--color-base-05);
+  --background-secondary: var(--color-base-20);
+  --background-secondary-alt: #101012;
+
+  --background-modifier-border: transparent;
+  --background-modifier-border-hover: transparent;
+  --background-modifier-border-focus: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.6);
+  --background-modifier-hover: rgba(255, 255, 255, 0.06);
+  --background-modifier-active-hover: rgba(255, 255, 255, 0.1);
+  --background-modifier-form-field: rgba(255, 255, 255, 0.07);
+  --background-modifier-message: rgba(0, 0, 0, 0.8);
+
+  --text-normal: #f5f5f7;
+  --text-muted: rgba(235, 235, 245, 0.62);
+  --text-faint: rgba(235, 235, 245, 0.36);
+  --text-on-accent: #ffffff;
+  --text-selection: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.32);
+  --text-highlight-bg: rgba(255, 214, 10, 0.32);
+
+  --interactive-normal: rgba(255, 255, 255, 0.07);
+  --interactive-hover: rgba(255, 255, 255, 0.12);
+
+  --divider-color: rgba(235, 235, 245, 0.14);
+  --scrollbar-thumb-bg: rgba(255, 255, 255, 0.18);
+  --scrollbar-active-thumb-bg: rgba(255, 255, 255, 0.32);
+
+  --hr-color: rgba(235, 235, 245, 0.14);
+  --code-background: rgba(255, 255, 255, 0.06);
+  --table-header-background: rgba(255, 255, 255, 0.05);
+  --table-row-alt-background: rgba(255, 255, 255, 0.03);
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-l: 0 16px 48px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --input-shadow: none;
+  --input-shadow-hover: none;
+
+  --lick-chrome: rgba(30, 30, 32, 0.72);
+  --lick-chrome-solid: #161618;
+  --lick-floating: rgba(44, 44, 47, 0.72);
+  --lick-elevated: #2c2c2f;
+  --lick-separator: rgba(235, 235, 245, 0.12);
+  --lick-fill: rgba(120, 120, 128, 0.24);
+  --lick-fill-strong: rgba(120, 120, 128, 0.36);
+
+  /* Dark mode lifts the other way: the card is lighter than the page it sits
+     on, which is how depth reads without a shadow. */
+  --lick-card-background: var(--lick-elevated);
+  --lick-card-background-hover: var(--color-base-30);
+}
+
+/* ---- Chrome colours ------------------------------------------------------
+   Obsidian declares its colour variables inside .theme-light / .theme-dark,
+   which outrank anything set on plain `body`. Chrome variables must therefore
+   be redeclared at class level or app.css keeps winning — most visibly with
+   --titlebar-background-focused, which defaults to --background-primary and
+   paints a white rectangle behind the macOS traffic lights whenever the
+   window has focus. */
+
+.theme-light,
+.theme-dark {
+  --titlebar-background: var(--background-secondary);
+  --titlebar-background-focused: var(--background-secondary);
+  --ribbon-background: var(--background-secondary);
+  --ribbon-background-collapsed: var(--background-secondary);
+  --tab-container-background: var(--background-secondary);
+  --tab-background-active: var(--lick-fill);
+  --tab-outline-color: transparent;
+  --tab-divider-color: transparent;
+}
+
+/* The main tab strip reads as part of the content, not the chrome, so it
+   takes the primary background while the sidebar strips stay chrome-coloured.
+   The right sidebar toggle is position:fixed over this strip and paints
+   itself from --tab-container-background, so it has to be switched too or it
+   leaves a grey block on the white bar. */
+.workspace-split.mod-root .workspace-tabs.mod-top,
+body.is-focused .workspace-split.mod-root .workspace-tabs.mod-top,
+.sidebar-toggle-button.mod-right,
+body.is-focused .sidebar-toggle-button.mod-right {
+  --tab-container-background: var(--background-primary);
+}
+
+/* …but once the right sidebar is open, that fixed button sits over the
+   sidebar's chrome instead of the white tab bar, so it has to follow. */
+.workspace.is-right-sidedock-open .sidebar-toggle-button.mod-right,
+body.is-focused .workspace.is-right-sidedock-open .sidebar-toggle-button.mod-right {
+  --tab-container-background: var(--background-secondary);
+}
+
+/* ---- Flavours ------------------------------------------------------------
+   Alternative palettes, selected in Style Settings. Each one redefines the
+   base ramp plus the theme-private --lick-* surfaces; everything else is
+   derived from those, so the rest of the theme follows automatically.
+
+   Selectors pair the flavour class with .theme-light / .theme-dark (0,2,0) so
+   they outrank the palettes above (0,1,0). Colour names below are
+   approximations of each app's look, not sampled values. */
+
+/* ---------------------------------------------------------- Things --- */
+
+.theme-light.lick-flavour-things {
+  --accent-h: 213;
+  --accent-s: 96%;
+  --accent-l: 53%;
+
+  --color-base-00: #ffffff;
+  --color-base-05: #fbfbfc;
+  --color-base-10: #f6f7f9;
+  --color-base-20: #edeff2;
+  --color-base-25: #e4e7eb;
+  --color-base-30: #dadee3;
+  --color-base-35: #d0d4da;
+  --color-base-40: #c5cad1;
+  --color-base-50: #a8aeb8;
+  --color-base-60: #878e99;
+  --color-base-70: #5e646e;
+  --color-base-100: #22252a;
+
+  --text-normal: #22252a;
+  --text-muted: rgba(34, 37, 42, 0.62);
+  --text-faint: rgba(34, 37, 42, 0.38);
+
+  --background-modifier-hover: rgba(34, 37, 42, 0.05);
+  --background-modifier-form-field: rgba(34, 37, 42, 0.05);
+
+  --divider-color: rgba(34, 37, 42, 0.14);
+  --hr-color: rgba(34, 37, 42, 0.14);
+  --code-background: rgba(34, 37, 42, 0.05);
+
+  --lick-chrome: rgba(237, 239, 242, 0.72);
+  --lick-chrome-solid: var(--background-secondary);
+  --lick-floating: rgba(255, 255, 255, 0.74);
+  --lick-elevated: #ffffff;
+  --lick-separator: rgba(34, 37, 42, 0.12);
+  --lick-fill: rgba(94, 100, 110, 0.11);
+  --lick-fill-strong: rgba(94, 100, 110, 0.2);
+
+  /* With a translucent window every sidebar surface is transparent, so this
+     tint is the only thing colouring them — a flavour that doesn't set it
+     keeps Obsidian's neutral white and appears to do nothing. */
+  --workspace-background-translucent: rgba(237, 239, 242, 0.72);
+}
+
+.theme-dark.lick-flavour-things {
+  --accent-h: 213;
+  --accent-s: 100%;
+  --accent-l: 61%;
+
+  --color-base-00: #24272c;
+  --color-base-05: #282c31;
+  --color-base-10: #2d3137;
+  --color-base-20: #1c1f23;
+  --color-base-25: #32363c;
+  --color-base-30: #3d424a;
+  --color-base-35: #474d55;
+  --color-base-40: #525860;
+  --color-base-50: #6b727c;
+  --color-base-60: #8d949e;
+  --color-base-70: #b3b9c2;
+  --color-base-100: #e9ebef;
+
+  --background-secondary-alt: #16181b;
+
+  --text-normal: #e9ebef;
+  --text-muted: rgba(233, 235, 239, 0.62);
+  --text-faint: rgba(233, 235, 239, 0.36);
+
+  --divider-color: rgba(233, 235, 239, 0.14);
+  --hr-color: rgba(233, 235, 239, 0.14);
+
+  --lick-chrome: rgba(36, 39, 44, 0.72);
+  --lick-chrome-solid: var(--background-secondary);
+  --lick-floating: rgba(50, 54, 60, 0.74);
+  --lick-elevated: #32363c;
+  --lick-separator: rgba(233, 235, 239, 0.12);
+  --workspace-background-translucent: rgba(28, 31, 35, 0.72);
+}
+
+/* -------------------------------------------------------- Graphite --- */
+
+/* Muted, tonal accents rather than the system rainbow — coloured headings
+   stay in keeping with a graphite palette instead of fighting it. */
+.lick-flavour-graphite {
+  --color-red: #a05c5c;
+  --color-orange: #a07c5c;
+  --color-yellow: #948c52;
+  --color-green: #5f8564;
+  --color-cyan: #5a848c;
+  --color-blue: #5a7590;
+  --color-purple: #7a6d90;
+  --color-pink: #90627a;
+}
+
+.theme-light.lick-flavour-graphite {
+  --accent-h: 210;
+  --accent-s: 12%;
+  --accent-l: 42%;
+
+  --color-base-00: #ffffff;
+  --color-base-05: #fafafb;
+  --color-base-10: #f4f5f6;
+  --color-base-20: #24272b; /* sidebar — dark, as in Bear's Graphite */
+  --color-base-25: #e6e7e9;
+  --color-base-30: #dcdee0;
+  --color-base-35: #d2d4d7;
+  --color-base-40: #c7cacd;
+  --color-base-50: #a9adb2;
+  --color-base-60: #888d93;
+  --color-base-70: #5d6268;
+  --color-base-100: #1c1e21;
+
+  --background-secondary-alt: #1c1f22;
+
+  --text-normal: #1c1e21;
+  --text-muted: rgba(28, 30, 33, 0.62);
+  --text-faint: rgba(28, 30, 33, 0.38);
+
+  --background-modifier-hover: rgba(28, 30, 33, 0.05);
+  --background-modifier-form-field: rgba(28, 30, 33, 0.05);
+
+  --divider-color: rgba(28, 30, 33, 0.14);
+  --hr-color: rgba(28, 30, 33, 0.14);
+  --code-background: rgba(28, 30, 33, 0.05);
+
+  --lick-chrome: rgba(36, 39, 43, 0.8);
+  --lick-chrome-solid: var(--background-secondary);
+  --lick-floating: rgba(255, 255, 255, 0.74);
+  --lick-elevated: #ffffff;
+  --lick-separator: rgba(28, 30, 33, 0.12);
+  --lick-fill: rgba(93, 98, 104, 0.11);
+  --lick-fill-strong: rgba(93, 98, 104, 0.2);
+
+  /* Graphite's dark sidebar has to survive translucency, so the tint is dark
+     and a little more opaque — a pale wallpaper would otherwise wash it out.
+     This is what actually colours the desktop sidebar whenever the translucent
+     window is on, so it has to track `--color-base-20`; leave it behind and the
+     sidebar reads lighter on desktop than it does on iPad. */
+  --workspace-background-translucent: rgba(36, 39, 43, 0.88);
+}
+
+/* Graphite's light mode puts a dark sidebar next to light content, so the
+   sidebars need their own text and fill colours. Setting them as variables on
+   the containers lets every descendant inherit, rather than restating each
+   component. */
+.theme-light.lick-flavour-graphite :is(.workspace-ribbon, .titlebar, .workspace-split.mod-left-split, .workspace-split.mod-right-split, .workspace-drawer),
+.theme-light.lick-flavour-graphite .workspace.is-right-sidedock-open .sidebar-toggle-button.mod-right {
+  --text-normal: #f0f1f2;
+  --text-muted: rgba(240, 241, 242, 0.64);
+  --text-faint: rgba(240, 241, 242, 0.38);
+  --icon-color: var(--text-muted);
+  /* The rest of the icon family, or hover and active states go black — the
+     app.css defaults alias body's dark text (`--icon-color-focused`) and the
+     accent (`--icon-color-active`), which is a dark grey-blue in Graphite. */
+  --icon-color-hover: var(--text-normal);
+  --icon-color-active: var(--text-normal);
+  --icon-color-focused: var(--text-normal);
+  --nav-item-color: var(--text-normal);
+  --nav-item-color-hover: var(--text-normal);
+  --nav-item-color-active: #ffffff;
+  --nav-item-background-hover: rgba(255, 255, 255, 0.08);
+  --nav-item-background-active: rgba(255, 255, 255, 0.16);
+  --nav-collapse-icon-color: rgba(240, 241, 242, 0.42);
+  --background-modifier-hover: rgba(255, 255, 255, 0.08);
+  --background-modifier-active-hover: rgba(255, 255, 255, 0.12);
+  --background-modifier-form-field: rgba(255, 255, 255, 0.1);
+  --tab-background-active: rgba(255, 255, 255, 0.12);
+
+  /* The sidebar's icon tab strip. Every one of these aliases a `--text-*` on
+     `body`, so they arrive already resolved against body's near-black text —
+     the selected tab's icon was `#1c1e21` on the dark chrome, 1.11:1. The
+     `-highlighted` variant aliases the accent, which is dark here too, so it
+     takes normal text rather than staying accent-coloured. */
+  --tab-text-color: var(--text-faint);
+  --tab-text-color-active: var(--text-muted);
+  --tab-text-color-focused: var(--text-muted);
+  --tab-text-color-focused-active: var(--text-muted);
+  --tab-text-color-focused-highlighted: var(--text-normal);
+  --tab-text-color-focused-active-current: var(--text-normal);
+
+  /* Opaque, one step up from the sidebar — not a translucent fill. The iPad
+     navigation selector's dropdown (`.workspace-drawer-tab-options-list`) is
+     painted with `--interactive-normal` and is absolutely positioned over the
+     file tree, so it has to hide what's behind it. The light value set for
+     Graphite on mobile — needed out in the settings window — made this list
+     near-white under the sidebar's light text, at 1.09:1. Overriding it on the
+     container keeps the sidebar dark while leaving the rest of the app light. */
+  --interactive-normal: #32363b;
+  --interactive-hover: #3b4046;
+
+  --divider-color: rgba(255, 255, 255, 0.14);
+  --scrollbar-thumb-bg: rgba(255, 255, 255, 0.22);
+  --scrollbar-active-thumb-bg: rgba(255, 255, 255, 0.34);
+  --lick-separator: rgba(255, 255, 255, 0.14);
+  --lick-fill: rgba(255, 255, 255, 0.1);
+  --lick-fill-strong: rgba(255, 255, 255, 0.18);
+
+  /* The vault selector reads `--vault-profile-color`, not `--text-normal`, and
+     app.css declares it as `--vault-profile-color: var(--text-normal)` on
+     `body` — so it is substituted against *body's* dark text there and then,
+     and inherits down already resolved. Overriding `--text-normal` on these
+     containers can't reach it, which is why the vault name stayed black on the
+     dark sidebar. Re-declaring it here re-resolves it against the light
+     `--text-normal` above. app.css sets `color` on the switcher explicitly
+     (0,4,1), so plain inheritance wouldn't have won either. */
+  --vault-profile-color: var(--text-normal);
+  --vault-profile-color-hover: #ffffff;
+
+  /* Variables only reach components that read them. Some mobile sidebar
+     labels — `.workspace-drawer-active-tab-title` is the one to check — have
+     no colour of their own and simply inherit `color`, which without this
+     comes from `body` and stays dark on the dark sidebar. Setting `color`
+     alongside the variables catches those too. */
+  color: var(--text-normal);
+}
+
+/* Graphite light is the one flavour whose `--background-secondary` is dark, and
+   on mobile Obsidian derives a set of *non-sidebar* surfaces from it —
+   `--interactive-normal`, `--settings-background`, `--settings-home-background`,
+   `--prompt-background`, `--suggestion-background` (all in app.css's `.is-mobile`
+   block, light mode included). Those surfaces sit outside the sidebar
+   containers, so they kept body's dark `--text-normal` and came out dark-on-dark:
+   the settings window in particular went black with black text. Point them back
+   at light surfaces. The prompt and suggestion containers are painted directly
+   by section 8 (`--lick-floating`) so they never showed the problem.
+   Desktop is unaffected — there the settings window falls back to
+   `--modal-background`, which is `--background-primary`. */
+body.lick-flavour-graphite.theme-light.is-mobile {
+  --settings-background: var(--color-base-10);
+  --settings-home-background: var(--color-base-10);
+  --interactive-normal: var(--color-base-25);
+  --interactive-hover: var(--color-base-30);
+
+  /* Phones included, unlike every other flavour. Section 9 leaves the phone
+     drawer on Obsidian's white, because there it is a sheet over the dimmed
+     note rather than a chrome column — but the drawer *is* the sidebar, and the
+     Graphite block below recolours its text to light. White surface plus light
+     text is unreadable, so Graphite takes the dark sidebar on every size. */
+  --mobile-sidebar-background: var(--background-secondary);
+}
+
+.theme-dark.lick-flavour-graphite {
+  --accent-h: 210;
+  --accent-s: 10%;
+  --accent-l: 62%;
+
+  --color-base-00: #26282b;
+  --color-base-05: #2a2c30;
+  --color-base-10: #2f3135;
+  --color-base-20: #1d1f21;
+  --color-base-25: #34373b;
+  --color-base-30: #3f4247;
+  --color-base-35: #494d52;
+  --color-base-40: #54585e;
+  --color-base-50: #6d7278;
+  --color-base-60: #8f949a;
+  --color-base-70: #b4b9be;
+  --color-base-100: #e6e8ea;
+
+  --background-secondary-alt: #171819;
+
+  --text-normal: #e6e8ea;
+  --text-muted: rgba(230, 232, 234, 0.62);
+  --text-faint: rgba(230, 232, 234, 0.36);
+
+  --divider-color: rgba(230, 232, 234, 0.14);
+  --hr-color: rgba(230, 232, 234, 0.14);
+
+  --lick-chrome: rgba(38, 40, 43, 0.72);
+  --lick-chrome-solid: var(--background-secondary);
+  --lick-floating: rgba(52, 55, 59, 0.74);
+  --lick-elevated: #34373b;
+  --lick-separator: rgba(230, 232, 234, 0.12);
+  --workspace-background-translucent: rgba(29, 31, 33, 0.72);
+}
+
+/* ------------------------------------------------------ Catppuccin --- */
+
+/* Latte for light, Mocha for dark, straight from the upstream palette — the
+   only flavour whose colours are sampled rather than approximated, so the hex
+   values are canonical and must not be nudged to taste.
+
+   Mapped the way the Catppuccin style guide lays out an editor: Base is the
+   note, Mantle the sidebar and chrome, Crust the deepest surface, Surface0-2
+   the raised UI, Overlay0-2 the dim furniture, Subtext/Text the type. Mauve is
+   the accent, which is the guide's stated default.
+
+   Only `--color-base-05` and `-10` are interpolated: they sit between Base and
+   Mantle, a gap the palette has no name for. Everything else in the ramp is a
+   real Catppuccin colour.
+
+   Unlike Graphite, this flavour also overrides the `--color-*-rgb` triples.
+   Obsidian derives every callout tint from those (`--callout-warning:
+   var(--color-orange-rgb)`), and they are declared separately from the hex
+   `--color-*` set — on `.theme-light` / `.theme-dark`, so (0,2,0) here beats
+   them. Setting only the hex names would leave callouts on Obsidian's stock
+   colours, which is exactly the sort of half-applied palette the style guide
+   is meant to prevent. Catppuccin has no distinct cyan or orange, so Teal and
+   Peach stand in, per the guide's own mapping. */
+
+.theme-light.lick-flavour-catppuccin {
+  /* Mauve #8839ef */
+  --accent-h: 266;
+  --accent-s: 85%;
+  --accent-l: 58%;
+
+  --color-base-00: #eff1f5; /* Base */
+  --color-base-05: #eceef3;
+  --color-base-10: #e9ecf1;
+  --color-base-20: #e6e9ef; /* Mantle */
+  --color-base-25: #dce0e8; /* Crust */
+  --color-base-30: #ccd0da; /* Surface0 */
+  --color-base-35: #bcc0cc; /* Surface1 */
+  --color-base-40: #acb0be; /* Surface2 */
+  --color-base-50: #9ca0b0; /* Overlay0 */
+  --color-base-60: #8c8fa1; /* Overlay1 */
+  --color-base-70: #6c6f85; /* Subtext0 */
+  --color-base-100: #4c4f69; /* Text */
+
+  --color-red: #d20f39;
+  --color-orange: #fe640b; /* Peach */
+  --color-yellow: #df8e1d;
+  --color-green: #40a02b;
+  --color-cyan: #179299; /* Teal */
+  --color-blue: #1e66f5;
+  --color-purple: #8839ef; /* Mauve */
+  --color-pink: #ea76cb;
+
+  --color-red-rgb: 210, 15, 57;
+  --color-orange-rgb: 254, 100, 11;
+  --color-yellow-rgb: 223, 142, 29;
+  --color-green-rgb: 64, 160, 43;
+  --color-cyan-rgb: 23, 146, 153;
+  --color-blue-rgb: 30, 102, 245;
+  --color-purple-rgb: 136, 57, 239;
+  --color-pink-rgb: 234, 118, 203;
+
+  --text-normal: #4c4f69; /* Text */
+  --text-muted: #6c6f85; /* Subtext0 */
+  --text-faint: #8c8fa1; /* Overlay1 */
+  --text-on-accent: #eff1f5; /* Base, per the guide — not white */
+  --text-highlight-bg: rgba(223, 142, 29, 0.35);
+
+  --background-modifier-hover: rgba(124, 127, 147, 0.14);
+  --background-modifier-active-hover: rgba(124, 127, 147, 0.22);
+  --background-modifier-form-field: rgba(124, 127, 147, 0.14);
+  --interactive-normal: rgba(124, 127, 147, 0.14);
+  --interactive-hover: rgba(124, 127, 147, 0.22);
+
+  --divider-color: rgba(76, 79, 105, 0.16);
+  --hr-color: rgba(76, 79, 105, 0.16);
+  --code-background: rgba(124, 127, 147, 0.16);
+  --table-header-background: rgba(124, 127, 147, 0.12);
+  --table-row-alt-background: rgba(124, 127, 147, 0.07);
+  --scrollbar-thumb-bg: rgba(76, 79, 105, 0.22);
+  --scrollbar-active-thumb-bg: rgba(76, 79, 105, 0.36);
+
+  --lick-chrome: rgba(230, 233, 239, 0.72);
+  --lick-chrome-solid: var(--background-secondary);
+  --lick-floating: rgba(239, 241, 245, 0.76);
+  --lick-elevated: #eff1f5; /* Base — a step up from the Mantle sidebar */
+  --lick-separator: rgba(76, 79, 105, 0.14);
+  --lick-fill: rgba(124, 127, 147, 0.16);
+  --lick-fill-strong: rgba(124, 127, 147, 0.26);
+
+  /* Tracks --color-base-20, or the desktop sidebar reads lighter than iPad's */
+  --workspace-background-translucent: rgba(230, 233, 239, 0.72);
+}
+
+.theme-dark.lick-flavour-catppuccin {
+  /* Mauve #cba6f7 */
+  --accent-h: 267;
+  --accent-s: 83%;
+  --accent-l: 81%;
+
+  --color-base-00: #1e1e2e; /* Base */
+  --color-base-05: #232336;
+  --color-base-10: #26263a;
+  --color-base-20: #181825; /* Mantle */
+  --color-base-25: #313244; /* Surface0 */
+  --color-base-30: #45475a; /* Surface1 */
+  --color-base-35: #585b70; /* Surface2 */
+  --color-base-40: #6c7086; /* Overlay0 */
+  --color-base-50: #7f849c; /* Overlay1 */
+  --color-base-60: #9399b2; /* Overlay2 */
+  --color-base-70: #a6adc8; /* Subtext0 */
+  --color-base-100: #cdd6f4; /* Text */
+
+  --color-red: #f38ba8;
+  --color-orange: #fab387; /* Peach */
+  --color-yellow: #f9e2af;
+  --color-green: #a6e3a1;
+  --color-cyan: #94e2d5; /* Teal */
+  --color-blue: #89b4fa;
+  --color-purple: #cba6f7; /* Mauve */
+  --color-pink: #f5c2e7;
+
+  --color-red-rgb: 243, 139, 168;
+  --color-orange-rgb: 250, 179, 135;
+  --color-yellow-rgb: 249, 226, 175;
+  --color-green-rgb: 166, 227, 161;
+  --color-cyan-rgb: 148, 226, 213;
+  --color-blue-rgb: 137, 180, 250;
+  --color-purple-rgb: 203, 166, 247;
+  --color-pink-rgb: 245, 194, 231;
+
+  --background-secondary-alt: #11111b; /* Crust */
+
+  --text-normal: #cdd6f4; /* Text */
+  --text-muted: #a6adc8; /* Subtext0 */
+  --text-faint: #7f849c; /* Overlay1 */
+
+  /* Mocha's accent is a pale mauve, so white on it is unreadable — the guide
+     puts Base on an accent fill. This is why the floating action button reads
+     `--text-on-accent` instead of the `#fff` it used to hardcode. */
+  --text-on-accent: #1e1e2e;
+  --text-highlight-bg: rgba(249, 226, 175, 0.35);
+
+  --background-modifier-hover: rgba(147, 153, 178, 0.14);
+  --background-modifier-active-hover: rgba(147, 153, 178, 0.22);
+  --background-modifier-form-field: rgba(147, 153, 178, 0.14);
+  --interactive-normal: rgba(147, 153, 178, 0.14);
+  --interactive-hover: rgba(147, 153, 178, 0.22);
+
+  --divider-color: rgba(205, 214, 244, 0.14);
+  --hr-color: rgba(205, 214, 244, 0.14);
+  --code-background: rgba(147, 153, 178, 0.14);
+  --table-header-background: rgba(147, 153, 178, 0.1);
+  --table-row-alt-background: rgba(147, 153, 178, 0.06);
+  --scrollbar-thumb-bg: rgba(205, 214, 244, 0.22);
+  --scrollbar-active-thumb-bg: rgba(205, 214, 244, 0.36);
+
+  --lick-chrome: rgba(24, 24, 37, 0.72);
+  --lick-chrome-solid: var(--background-secondary);
+  --lick-floating: rgba(49, 50, 68, 0.76);
+  --lick-elevated: #313244; /* Surface0 */
+  --lick-separator: rgba(205, 214, 244, 0.12);
+  --lick-fill: rgba(147, 153, 178, 0.16);
+  --lick-fill-strong: rgba(147, 153, 178, 0.26);
+
+  --workspace-background-translucent: rgba(24, 24, 37, 0.72);
+}
+
+/* ============================================================================
+   2. Global type & app shell
+   ========================================================================= */
+
+body {
+  --font-interface: var(--font-interface-theme);
+  --font-text: var(--font-text-theme);
+  --font-monospace: var(--font-monospace-theme);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.003em;
+}
+
+/* ---- Font choices (Style Settings) ----
+   Inter is bundled with Obsidian, so it needs no install. Sora is not — the
+   stack falls back to the system font if it's missing, which is why the
+   setting says so. Monospace is left alone in both cases. The tight tracking
+   above is tuned for SF; both of these need less of it. */
+
+body.lick-font-inter {
+  --font-interface-theme: "Inter", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+  --font-text-theme: "Inter", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+  letter-spacing: 0;
+}
+
+body.lick-font-sora {
+  --font-interface-theme: "Sora", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+  --font-text-theme: "Sora", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+  letter-spacing: -0.005em;
+}
+
+/* The workspace itself is chrome-coloured; only the root split — the content
+   area — takes the primary background. Any uncovered chrome gap then falls
+   back to the sidebar colour instead of showing white. */
+.workspace {
+  background-color: var(--background-secondary);
+}
+
+.workspace-split.mod-root {
+  background-color: var(--background-primary);
+}
+
+/* ---- Translucent window: sidebars only --------------------------------
+   Obsidian's translucent mode blanks the entire workspace —
+   `background-color: transparent !important` on the ribbon, every split,
+   every tab strip and every leaf — so the note area goes see-through along
+   with the sidebars. Lick keeps the translucency where it belongs (the
+   ribbon and sidebars, which app.css already handles) and paints the main
+   column back to opaque. Each selector below carries one more class than the
+   app.css rule it overrides, since those are !important. */
+
+.is-translucent:not(.is-fullscreen) .workspace-split.mod-root,
+.is-translucent:not(.is-fullscreen) .workspace-split.mod-root .workspace-tabs,
+.is-translucent:not(.is-fullscreen) .workspace-split.mod-root .workspace-tabs .workspace-leaf,
+.is-translucent:not(.is-fullscreen)
+  .workspace-split.mod-root
+  .workspace-tabs.mod-top
+  .workspace-tab-header-container {
+  background-color: var(--background-primary) !important;
+}
+
+/* The fixed right-sidebar toggle follows whatever it happens to sit over:
+   the opaque tab bar when the sidebar is closed, the translucent sidebar
+   when it's open. */
+.is-translucent:not(.is-fullscreen)
+  .workspace:not(.is-right-sidedock-open)
+  .sidebar-toggle-button.mod-right {
+  background-color: var(--background-primary) !important;
+}
+
+.workspace-split.mod-left-split,
+.workspace-split.mod-right-split {
+  background-color: var(--background-secondary);
+}
+
+/* Resize handles. In app.css the handle's *hit area* is --divider-vertical-height
+   x --divider-width-hover and the visible line is a border of --divider-width,
+   so `--divider-width: 0px` already gives an invisible but still draggable
+   divider — the handle must therefore keep its size and stay transparent at
+   rest. `inset: -3px` on the pseudo-element widens the 3px target to a
+   comfortable ~9px without drawing anything; it inherits the handle's
+   col-resize/row-resize cursor, and hovering it counts as hovering the handle,
+   so the accent line below still lights up. */
+.workspace-leaf-resize-handle::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+}
+
+.workspace-split.mod-left-split > .workspace-leaf-resize-handle,
+.workspace-split.mod-right-split > .workspace-leaf-resize-handle {
+  background-color: transparent;
+}
+
+/* Nothing at rest; a sliver of accent once you're on it or dragging. */
+.workspace-leaf-resize-handle:hover,
+.workspace-leaf-resize-handle.is-dragging {
+  background-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  transition: background-color var(--anim-duration-moderate) var(--lick-ease);
+  transition-delay: 120ms;
+}
+
+/* Everything in the top chrome row — titlebar, sidebar tab strips, ribbon —
+   is painted the same colour as the sidebar. It must be painted explicitly,
+   not left transparent: Obsidian swaps the titlebar to
+   --titlebar-background-focused (normally --background-primary) when the
+   window has focus, which puts a white rectangle behind the traffic lights.
+   --lick-chrome-solid and --background-secondary are the same value in both
+   modes, so the whole row reads as one continuous surface. */
+/* app.css paints the focused titlebar with `.is-focused .titlebar`, so a
+   single-class rule here loses. The body-qualified selectors outrank it. */
+.titlebar,
+body.is-focused .titlebar,
+body.mod-macos .titlebar,
+body .titlebar.is-focused,
+.workspace-tab-header-container,
+.workspace-tabs .workspace-tab-header-container,
+.workspace-split.mod-left-split .workspace-tabs,
+.workspace-split.mod-right-split .workspace-tabs {
+  background-color: var(--background-secondary);
+  border: none;
+  box-shadow: none;
+}
+
+/* Anything not explicitly painted falls back to the sidebar colour rather
+   than white, so no uncovered gap can show through as a light rectangle.
+   These two sit in front of Obsidian's translucent backdrop, so they must
+   stand down when it's enabled or the sidebars can never be see-through. */
+.app-container,
+.horizontal-main-container {
+  background-color: var(--background-secondary);
+}
+
+/* .app-container is left alone — app.css gives it
+   --workspace-background-translucent, the frosted tint that keeps sidebar
+   text readable over the desktop. Only the layer in front of it stands down. */
+.is-translucent:not(.is-fullscreen) .horizontal-main-container {
+  background-color: transparent;
+}
+
+.titlebar-inner {
+  color: var(--text-muted);
+  font-weight: 590;
+}
+
+/* ============================================================================
+   3. Sidebar — larger type, generous spacing, macOS selection pills
+   ========================================================================= */
+
+.workspace-split.mod-left-split .workspace-leaf-content,
+.workspace-split.mod-right-split .workspace-leaf-content {
+  background-color: transparent;
+}
+
+body {
+  --nav-item-size: 15px;
+  --nav-item-weight: 450;
+  --nav-item-weight-hover: 450;
+  --nav-item-weight-active: 590;
+  --nav-item-color: var(--text-normal);
+  --nav-item-color-hover: var(--text-normal);
+  --nav-item-color-active: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --nav-item-background-hover: var(--background-modifier-hover);
+  --nav-item-background-active: var(--background-modifier-hover);
+  /* The left value has to clear the collapse indicator. app.css positions
+     `.tree-item-icon` absolutely at `left: <padding-left>` and then pulls it
+     back by `margin-inline-start: -20px`, so the icon occupies
+     [padding-left - 20, padding-left - 4]. Obsidian's own 24px is the reason
+     its chevrons sit just inside the item; at 14px the icon started 6px
+     *outside* the item and touched the edge of the selection pill. 26px keeps
+     a 6px gap, which suits Lick's roomier sidebar. Applies to every tree —
+     file explorer, search, outline, bookmarks. */
+  --nav-item-padding: 6px 12px 6px 26px;
+  --nav-item-children-padding-left: 16px;
+  --nav-item-children-margin-left: 12px;
+  --nav-indentation-guide-color: transparent;
+  --nav-indentation-guide-width: 0px;
+  --nav-heading-color: var(--text-normal);
+  --nav-heading-weight: 700;
+  --nav-collapse-icon-color: var(--text-faint);
+}
+
+.nav-file-title,
+.nav-folder-title {
+  border-radius: 8px;
+  line-height: 1.45;
+  margin-bottom: 1px;
+  transition: background-color var(--anim-duration-fast) var(--lick-ease);
+}
+
+/* Folders read at the same weight as files — the collapse chevron and the
+   folder icon already distinguish them, so bolding every folder made the tree
+   noisy. `is-active` still gets `--nav-item-weight-active`. */
+.nav-folder-title {
+  font-weight: var(--nav-item-weight);
+}
+
+.nav-file-title.is-active,
+.nav-folder-title.is-active {
+  font-weight: var(--nav-item-weight-active);
+}
+
+.tree-item-self.is-clickable:active {
+  transform: scale(0.985);
+}
+
+/* Breathing room down both edges of the sidebars, so nothing — selection
+   pills included — runs into the sidebar edge.
+   The file explorer has NO .view-content: .nav-header and .nav-files-container
+   are direct children of .workspace-leaf-content. So both surfaces need the
+   inset, and the nested case is reset below to stop it doubling up. */
+.nav-files-container,
+.nav-header,
+.workspace-split.mod-left-split .view-content,
+.workspace-split.mod-right-split .view-content,
+.workspace-drawer-inner {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.view-content .nav-files-container,
+.workspace-drawer-inner .nav-files-container,
+.view-content .nav-header,
+.workspace-drawer-inner .nav-header {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.workspace-leaf-content[data-type="search"] .search-input-container {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* The file explorer action row sits in its own floating strip */
+.nav-header {
+  padding-top: 2px;
+  padding-bottom: 8px;
+}
+
+.nav-buttons-container {
+  background-color: var(--lick-fill);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  justify-content: space-between;
+}
+
+.nav-buttons-container .clickable-icon {
+  border-radius: 7px;
+}
+
+.nav-buttons-container .clickable-icon:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+/* Desktop: the action row auto-hides to a grabber pill.
+   At rest the toolbar is collapsed and a small centred pill stands in for it,
+   so the sidebar opens on the file tree instead of a strip of icons; pointing
+   at the top of the sidebar rolls the real row back out.
+
+   The collapse is a one-row grid swapping `0fr` to `1fr`. That is the only way
+   to *animate* to a natural height — `height: auto` is not interpolatable, and
+   a `max-height` guess either clips the row or leaves dead time in the
+   transition. The row only reaches 0 if the item can: hence `min-height: 0`
+   (grid items floor at min-content otherwise) plus `overflow: hidden`.
+
+   The row's vertical padding has to go with it. `box-sizing: border-box` will
+   not shrink a box below its own padding, so the toolbar's 3px floored the
+   collapsed row at 6px — and since that row carries `--lick-fill`, the result
+   was a full-width bar sitting behind the pill instead of the pill alone.
+   Padding interpolates, so it rides the same transition.
+
+   The pill is a `::before` positioned out of flow rather than a second grid
+   row: as a row it would need a fixed height, which is exactly the thing that
+   cannot animate away. It needs no `min-height` on the header to hold a strip
+   open — the header's own 2px/8px padding already outlives the collapsed row
+   and leaves a 10px band, which is what `top: 3px` centres the pill in. That
+   band, full sidebar width, is the hover target.
+
+   Held open by `:focus-within` for keyboard users, and by `:has(...)` while a
+   button's menu is up — Obsidian marks the trigger `has-active-menu`, and
+   without this the sort menu would collapse its own button out from under
+   itself. `:has()` sits in its own rule so it cannot invalidate the others.
+   Mobile keeps the toolbar permanently visible: there is no hover, and on
+   phones app.css re-anchors this row to the bottom of the drawer. */
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header {
+  position: relative;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--anim-duration-moderate) var(--lick-ease);
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header
+  > .nav-buttons-container {
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: padding-top var(--anim-duration-moderate) var(--lick-ease),
+    padding-bottom var(--anim-duration-moderate) var(--lick-ease);
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  width: 28px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background-color: var(--lick-fill);
+  pointer-events: none;
+  transition: opacity var(--anim-duration-fast) var(--lick-ease);
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:hover,
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:focus-within {
+  grid-template-rows: 1fr;
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:hover
+  > .nav-buttons-container,
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:focus-within
+  > .nav-buttons-container {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:hover::before,
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:focus-within::before {
+  opacity: 0;
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:has(.has-active-menu) {
+  grid-template-rows: 1fr;
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:has(.has-active-menu)
+  > .nav-buttons-container {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+body:not(.is-mobile)
+  .workspace-leaf-content[data-type='file-explorer']
+  > .nav-header:has(.has-active-menu)::before {
+  opacity: 0;
+}
+
+/* Sidebar view headers: quiet, no lines */
+.workspace-split.mod-left-split .view-header,
+.workspace-split.mod-right-split .view-header {
+  background-color: transparent;
+  border: none;
+  height: 40px;
+}
+
+.workspace-split.mod-left-split .view-header-title,
+.workspace-split.mod-right-split .view-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-normal);
+  letter-spacing: -0.01em;
+}
+
+/* Outline / tags / bookmarks / search results share the sidebar scale */
+.tree-item-self {
+  font-size: var(--nav-item-size);
+  border-radius: 8px;
+}
+
+.search-result-file-title {
+  font-size: var(--nav-item-size);
+  font-weight: 590;
+}
+
+/* ---- Ribbon ---- */
+
+/* The ribbon runs up behind the traffic lights, so it has to match the
+   sidebar rather than the content area. */
+body {
+  --ribbon-background: var(--background-secondary);
+  --ribbon-background-collapsed: var(--background-secondary);
+}
+
+.workspace-ribbon {
+  background-color: var(--background-secondary);
+  border: none;
+}
+
+.workspace-ribbon.mod-left:before,
+.workspace-ribbon.mod-right:before {
+  display: none;
+}
+
+.side-dock-ribbon-action,
+.clickable-icon {
+  border-radius: 7px;
+  color: var(--text-muted);
+  transition: background-color var(--anim-duration-fast) var(--lick-ease),
+    color var(--anim-duration-fast) var(--lick-ease);
+}
+
+.clickable-icon:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.side-dock-ribbon-action.is-active {
+  color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  background-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.14);
+}
+
+/* Sidebar toggles and header icons are plain glyphs — no resting fill.
+   Obsidian marks these `is-active` while their sidebar is open and fills
+   them, which leaves a grey chip sitting on the background. The selectors
+   are deliberately over-specified (.workspace ancestor + both the button and
+   its inner icon) to outweigh app.css's own two-class rules. */
+.workspace .sidebar-toggle-button,
+.workspace .sidebar-toggle-button.is-active,
+.workspace .sidebar-toggle-button.mod-left,
+.workspace .sidebar-toggle-button.mod-right,
+.workspace .sidebar-toggle-button .clickable-icon,
+.workspace .sidebar-toggle-button .clickable-icon.is-active,
+.workspace :is(.workspace-tab-header-container, .view-header, .view-actions, .nav-header)
+  > .clickable-icon.is-active {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.workspace .sidebar-toggle-button .clickable-icon:hover,
+.workspace .sidebar-toggle-button .clickable-icon.is-active:hover,
+.workspace :is(.workspace-tab-header-container, .view-header, .view-actions, .nav-header)
+  > .clickable-icon.is-active:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* ============================================================================
+   4. Tabs — Safari-style floating sheets
+   ========================================================================= */
+
+/* Colour-valued tab variables live in the chrome block above, at class level,
+   so app.css's .theme-light / .theme-dark declarations can't outrank them. */
+body {
+  --tab-text-color: var(--text-muted);
+  --tab-text-color-active: var(--text-muted);
+  --tab-text-color-focused: var(--text-muted);
+  --tab-text-color-focused-active: var(--text-normal);
+  --tab-text-color-focused-active-current: var(--text-normal);
+  --tab-font-weight: 500;
+  --tab-radius-active: 10px;
+  --tab-curve: 0px;
+  --header-height: 42px;
+}
+
+/* White bar, continuous with the note below it. The active tab is a filled
+   pill rather than a raised white sheet — on a white bar a sheet would only
+   be visible by its shadow. No vertical padding here: the container is a
+   fixed --header-height, and padding squeezes the tabs. */
+.workspace-split.mod-root .workspace-tab-header-container {
+  background-color: var(--background-primary);
+}
+
+/* The active tab's fill belongs to the inner element only. Obsidian also
+   paints the outer .workspace-tab-header and draws curved shoulders with
+   pseudo-elements; left alone, those sit behind the rounded inner and read as
+   a white border around it. */
+.workspace .workspace-tab-header,
+.workspace .workspace-tab-header.is-active,
+.workspace .workspace-tab-header.mod-active {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Obsidian blends each tab into the content below with curved "shoulder"
+   pseudo-elements sized by --tab-curve. --tab-curve: 0 already collapses
+   them; hiding them as well keeps them from reappearing if that value is
+   ever restored. These two are the only decorative curves in the workspace
+   chrome — verified against app.css, so don't widen this list speculatively. */
+.workspace-tab-header::before,
+.workspace-tab-header::after {
+  display: none;
+}
+
+.workspace-tab-header-inner {
+  border-radius: var(--tab-radius-active);
+  padding: 5px 12px;
+  gap: 6px;
+}
+
+.workspace .workspace-tab-header.is-active .workspace-tab-header-inner {
+  background-color: var(--tab-background-active);
+  box-shadow: none;
+}
+
+/* Sidebar tab strips are icon tabs — a filled pill would be too heavy there */
+.workspace-split:not(.mod-root) .workspace-tab-header.is-active .workspace-tab-header-inner {
+  background-color: var(--background-modifier-hover);
+  box-shadow: none;
+}
+
+.mod-root .workspace-tab-header:not(.is-active):hover .workspace-tab-header-inner {
+  background-color: var(--background-modifier-hover);
+}
+
+.workspace-tab-header-inner-title {
+  font-size: var(--font-ui-small);
+  letter-spacing: -0.01em;
+}
+
+/* Sidebar tab strip (icon tabs) */
+.workspace-split:not(.mod-root) .workspace-tab-header.is-active {
+  color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+}
+
+/* Main view header — the breadcrumb / navigation strip.
+   It keeps a real background rather than being transparent: with a
+   translucent window Obsidian forces the leaf behind it to transparent, and
+   a see-through strip then sits oddly against the opaque note below it. */
+.view-header {
+  background-color: var(--file-header-background, var(--background-primary));
+  border: none;
+  box-shadow: none;
+}
+
+.is-translucent .view-header {
+  background-color: var(--background-primary);
+}
+
+.view-header-title {
+  font-weight: 590;
+  letter-spacing: -0.012em;
+}
+
+.view-header-icon,
+.view-action {
+  color: var(--text-muted);
+}
+
+/* ============================================================================
+   5. Editor typography
+   ========================================================================= */
+
+.markdown-source-view,
+.markdown-preview-view,
+.markdown-rendered {
+  line-height: var(--line-height-normal);
+}
+
+/* Breathing room under the view header, scoped to an actual note leaf on
+   purpose. `.markdown-preview-view` on its own is not "the note": Obsidian
+   stamps that class on any markdown it renders, and plugins embed the result
+   all over the place — the Kanban plugin clones one into every card. Unscoped,
+   the 8px pushed each card's text down while its checkbox stayed pinned to the
+   top of the row (Kanban gives the prefix wrapper `align-self: start`), so the
+   checkbox floated ~8px above the text it belonged to. The `.cm-scroller` half
+   was already scoped to the editor; this matches it. */
+.workspace-leaf-content[data-type="markdown"] .markdown-preview-view,
+.markdown-source-view.mod-cm6 .cm-scroller {
+  padding-top: 8px;
+}
+
+p,
+li,
+.cm-line {
+  letter-spacing: -0.006em;
+}
+
+strong,
+.cm-strong {
+  font-weight: 640;
+}
+
+/* Links: system blue, underline only on hover — macOS behaviour */
+body {
+  --link-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --link-color-hover: hsl(var(--accent-h), var(--accent-s), calc(var(--accent-l) - 8%));
+  --link-decoration: none;
+  --link-decoration-hover: underline;
+  --link-external-color: var(--link-color);
+  --link-external-decoration: none;
+  --link-external-decoration-hover: underline;
+  --link-unresolved-color: var(--text-muted);
+  --link-unresolved-opacity: 0.6;
+  --link-unresolved-decoration-style: none;
+  --link-unresolved-decoration-color: transparent;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--text-selection);
+}
+
+/* Horizontal rule — the one hairline allowed in content */
+hr,
+.markdown-rendered hr {
+  border: none;
+  height: 1px;
+  background-color: var(--hr-color);
+  margin: 2.2em 0;
+}
+
+/* Blockquote — tinted surface instead of a rule */
+.markdown-rendered blockquote,
+.cm-s-obsidian .HyperMD-quote {
+  border: none;
+  border-left: none;
+  padding: 0.6em 1em;
+  border-radius: var(--radius-m);
+  background-color: var(--lick-fill);
+  color: var(--text-normal);
+  font-style: normal;
+}
+
+.markdown-rendered blockquote {
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+/* Inline code + code blocks */
+body {
+  --code-radius: var(--radius-m);
+  --code-size: 0.9em;
+}
+
+.markdown-rendered code {
+  border-radius: 5px;
+  padding: 0.15em 0.35em;
+}
+
+.markdown-rendered pre {
+  border: none;
+  border-radius: var(--radius-m);
+  padding: 14px 16px;
+}
+
+/* In Live Preview each line of a fenced block carries its own
+   `.HyperMD-codeblock-bg` background, so a radius on that class rounds every
+   line and the block reads as scalloped. Round only the outer corners: top on
+   the opening fence, bottom on the closing one, square everywhere between. */
+.cm-s-obsidian .HyperMD-codeblock-bg {
+  border: none;
+  border-radius: 0;
+}
+
+.cm-s-obsidian .HyperMD-codeblock-begin-bg {
+  border-radius: var(--radius-m) var(--radius-m) 0 0;
+}
+
+.cm-s-obsidian .HyperMD-codeblock-end-bg {
+  border-radius: 0 0 var(--radius-m) var(--radius-m);
+}
+
+/* A one-line block is both the begin and the end line. */
+.cm-s-obsidian .HyperMD-codeblock-begin-bg.HyperMD-codeblock-end-bg {
+  border-radius: var(--radius-m);
+}
+
+/* Tags — iOS capsule chips */
+body {
+  --tag-background: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.14);
+  --tag-background-hover: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.24);
+  --tag-color: hsl(var(--accent-h), var(--accent-s), calc(var(--accent-l) - 4%));
+  --tag-border-width: 0px;
+  --tag-padding-x: 0.7em;
+  --tag-padding-y: 0.22em;
+  --tag-radius: 999px;
+  --tag-weight: 500;
+}
+
+/* Tables keep their grid — the borderless rule doesn't apply here, because a
+   table without cell borders is genuinely harder to read. */
+body {
+  --table-border-width: 1px;
+  --table-border-color: var(--lick-separator);
+  --table-header-weight: 640;
+}
+
+.markdown-rendered table {
+  border-collapse: collapse;
+  box-shadow: none;
+}
+
+.markdown-rendered th,
+.markdown-rendered td {
+  border: var(--table-border-width) solid var(--table-border-color);
+  padding: 8px 12px;
+}
+
+/* The header fill belongs to the row, never the cells. app.css already paints
+   `thead tr` with --table-header-background and then resets even columns to
+   --table-column-alt-background for its column striping. Painting the cells
+   as well stacks a second layer of the same translucent fill on the odd
+   columns only, so the header comes out striped. Weight comes from
+   --table-header-weight above. */
+
+/* Callouts — macOS grouped cards.
+   The card is a neutral `--lick-fill` surface, the same fill the sidebar pills
+   and the file explorer toolbar use, with only a 7% wash of the callout's own
+   colour over it. Obsidian's default is a flat 10% colour block, which reads as
+   a coloured banner; on macOS the surface stays neutral and the *glyph* carries
+   the semantics, the way a Notes or Xcode inline note does. Enough colour is
+   kept to tell a warning from a tip at a glance without the page turning into
+   stripes of colour.
+
+   The wash has to be a `background-image` over `background-color`: the neutral
+   and the tint are two translucent layers, and `background-color` only holds
+   one. A `color-mix()` would flatten them into a single opaque colour and lose
+   the translucency the card needs to sit on any background.
+   `--callout-blend-mode: normal` matters here — Obsidian's default blend would
+   otherwise multiply the two layers against the note. */
+body {
+  --callout-border-width: 0px;
+  --callout-border-opacity: 0;
+  --callout-padding: 14px 16px;
+  --callout-radius: var(--radius-m);
+  --callout-blend-mode: normal;
+  --callout-title-size: 1em;
+
+  /* Set the weight through the variable, not on `.callout-title`. app.css puts
+     the title text in a `.callout-title-inner` child that declares its own
+     `font-weight: var(--font-weight)` from `--callout-title-weight`, so a rule
+     on the parent is overridden and silently does nothing. */
+  --callout-title-weight: 640;
+
+  /* Title in normal text, not the callout colour. app.css tints the whole
+     title row and lets the inner text inherit it; keeping the tint on the icon
+     alone is both quieter and more legible, and it is what makes the card read
+     as macOS rather than as a coloured admonition block. */
+  --callout-title-color: var(--text-normal);
+}
+
+.callout {
+  background-color: var(--lick-fill);
+  background-image: linear-gradient(
+    rgba(var(--callout-color), 0.07),
+    rgba(var(--callout-color), 0.07)
+  );
+  box-shadow: none;
+}
+
+.callout-title {
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+/* The content's own paragraph margin stacks on the card's padding: measured
+   16px + 14px, so the title floated 30px above its body and the card sat
+   bottom-heavy. Only the leading and trailing edges are collapsed — the 16px
+   *between* paragraphs is Obsidian's normal rhythm and stays. */
+.callout-content > :first-child {
+  /* A literal, not `var(--size-4-2)`. Obsidian's spacing scale lives in
+     app.css, which `preview.html` deliberately does not load, so the variable
+     resolves to nothing there and the whole declaration is dropped — the
+     preview would show a gap the app doesn't have. The rest of this block is
+     literal for the same reason. */
+  margin-top: 8px;
+}
+
+.callout-content > :last-child {
+  margin-bottom: 0;
+}
+
+/* Nested cards step up rather than restating the same fill, so a callout
+   inside a callout still reads as a separate surface. */
+.callout-content .callout {
+  background-color: var(--background-primary);
+}
+
+.callout-fold {
+  color: var(--text-faint);
+}
+
+.callout-fold .svg-icon {
+  transition: transform var(--anim-duration-fast) var(--lick-ease);
+}
+
+/* ---- File properties ----------------------------------------------------
+   Reads as a quiet macOS inspector list: no chrome at rest, fields only
+   materialise on hover and focus. The blanket input rule in section 7 would
+   otherwise put a grey pill behind every key and value, so both are reset
+   here explicitly. */
+
+body {
+  --metadata-background: transparent;
+  --metadata-border-color: transparent;
+  --metadata-border-width: 0px;
+  --metadata-border-radius: var(--radius-m);
+  --metadata-divider-color: transparent;
+  --metadata-divider-color-hover: transparent;
+  --metadata-divider-color-focus: transparent;
+  --metadata-divider-width: 0px;
+  --metadata-padding: var(--size-4-2) 0 var(--size-4-3);
+  --metadata-gap: 2px;
+
+  /* Whole-row hover, so key and value highlight together */
+  --metadata-property-radius: 7px;
+  --metadata-property-radius-hover: 7px;
+  --metadata-property-radius-focus: 7px;
+  --metadata-property-background: transparent;
+  --metadata-property-background-hover: var(--background-modifier-hover);
+  --metadata-property-background-active: var(--background-modifier-hover);
+  --metadata-property-box-shadow-hover: none;
+  --metadata-property-box-shadow-focus: 0 0 0 2px
+    hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.35);
+
+  /* Key and value stay flat — the row behind them carries the state */
+  --metadata-label-background: transparent;
+  --metadata-label-background-hover: transparent;
+  --metadata-label-background-active: transparent;
+  --metadata-label-text-color: var(--text-muted);
+  --metadata-label-text-color-hover: var(--text-muted);
+  --metadata-label-font-size: var(--font-ui-small);
+  --metadata-label-font-weight: 500;
+  --metadata-input-text-color: var(--text-normal);
+  --metadata-input-font-size: var(--font-ui-small);
+  --metadata-input-background: transparent;
+  --metadata-input-background-hover: transparent;
+  --metadata-input-background-active: var(--background-modifier-form-field);
+  --metadata-sidebar-label-font-size: var(--font-ui-smaller);
+  --metadata-sidebar-input-font-size: var(--font-ui-smaller);
+}
+
+/* The generic input styling in section 7 is `input[type="text"]`, which has
+   the same specificity as app.css's `input.metadata-property-key-input` and
+   loads later — so it wins and drops a grey pill behind every property key.
+   These resets are scoped to .metadata-container to outrank it. Any future
+   blanket input rule needs the same escape hatch. */
+.metadata-container input[type="text"],
+.metadata-container input[type="number"],
+.metadata-container input[type="date"],
+.metadata-container input[type="datetime-local"],
+.metadata-container input.metadata-property-key-input,
+.metadata-container input.metadata-input-text,
+.metadata-container textarea,
+.metadata-container .multi-select-container {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.metadata-container input[type="text"]:focus,
+.metadata-container input.metadata-input-text:focus,
+.metadata-container textarea:focus {
+  background-color: var(--metadata-input-background-active);
+  box-shadow: none;
+}
+
+.metadata-container {
+  border: none;
+  background-color: transparent;
+  margin-bottom: 1.4em;
+}
+
+.metadata-properties-heading {
+  border: none;
+  padding: 2px 0 6px;
+  color: var(--text-muted);
+}
+
+.metadata-properties-title {
+  font-size: var(--font-ui-small);
+  font-weight: 590;
+  color: var(--text-muted);
+  letter-spacing: -0.005em;
+}
+
+.metadata-property-icon {
+  color: var(--text-faint);
+}
+
+.metadata-input-longtext,
+.metadata-link-inner {
+  border-radius: 6px;
+}
+
+.metadata-add-button {
+  border-radius: 7px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-small);
+  font-weight: 500;
+  padding: 5px 8px;
+  margin-top: 2px;
+}
+
+.metadata-add-button:hover {
+  color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  background-color: var(--background-modifier-hover);
+}
+
+/* Multi-select values (tags, lists) become capsules */
+.multi-select-pill {
+  border: none;
+  border-radius: 999px;
+  background-color: var(--lick-fill);
+  font-size: var(--font-ui-smaller);
+}
+
+/* Embeds & images */
+.markdown-rendered img,
+.markdown-rendered video {
+  border-radius: var(--radius-m);
+}
+
+.markdown-embed {
+  border: none;
+  padding-left: 0;
+  border-radius: var(--radius-m);
+  background-color: var(--lick-fill);
+  padding: 4px 16px;
+}
+
+/* ============================================================================
+   6. Headings
+   ========================================================================= */
+
+body {
+  --h1-size: 1.85em;
+  --h2-size: 1.45em;
+  --h3-size: 1.2em;
+  --h4-size: 1.05em;
+  --h5-size: 0.95em;
+  --h6-size: 0.88em;
+
+  --h1-weight: 700;
+  --h2-weight: 700;
+  --h3-weight: 640;
+  --h4-weight: 640;
+  --h5-weight: 640;
+  --h6-weight: 640;
+
+  --h1-line-height: 1.2;
+  --h2-line-height: 1.25;
+  --h3-line-height: 1.3;
+
+  --heading-spacing: 1.6em;
+}
+
+.markdown-rendered h1,
+.markdown-rendered h2,
+.markdown-rendered h3,
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6,
+.HyperMD-header {
+  letter-spacing: -0.021em;
+  position: relative;
+}
+
+.markdown-rendered h6,
+.HyperMD-header-6 {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Coloured headings (default, and explicit Style Settings class) ---- */
+
+body:not(.lick-headings-mono) {
+  --h1-color: var(--color-blue);
+  --h2-color: var(--color-purple);
+  --h3-color: var(--color-pink);
+  --h4-color: var(--color-orange);
+  --h5-color: var(--color-green);
+  --h6-color: var(--color-cyan);
+}
+
+body.lick-headings-mono {
+  --h1-color: var(--text-normal);
+  --h2-color: var(--text-normal);
+  --h3-color: var(--text-normal);
+  --h4-color: var(--text-normal);
+  --h5-color: var(--text-normal);
+  --h6-color: var(--text-muted);
+}
+
+/* Live Preview headings pick up the same colours */
+.cm-s-obsidian .HyperMD-header-1,
+.cm-s-obsidian .cm-header-1 { color: var(--h1-color); }
+.cm-s-obsidian .HyperMD-header-2,
+.cm-s-obsidian .cm-header-2 { color: var(--h2-color); }
+.cm-s-obsidian .HyperMD-header-3,
+.cm-s-obsidian .cm-header-3 { color: var(--h3-color); }
+.cm-s-obsidian .HyperMD-header-4,
+.cm-s-obsidian .cm-header-4 { color: var(--h4-color); }
+.cm-s-obsidian .HyperMD-header-5,
+.cm-s-obsidian .cm-header-5 { color: var(--h5-color); }
+.cm-s-obsidian .HyperMD-header-6,
+.cm-s-obsidian .cm-header-6 { color: var(--h6-color); }
+
+/* ---- Heading indicator: Dot ---- */
+
+/* Offsets are in px, not em: an em offset scales with the heading size and
+   pushes H1's marker outside the editor padding, where it gets clipped. */
+body.lick-hi-dot .markdown-rendered :is(h1, h2, h3, h4, h5, h6)::before,
+body.lick-hi-dot .HyperMD-header::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 0.62em;
+  width: 0.3em;
+  height: 0.3em;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.75;
+}
+
+body.lick-hi-dot .markdown-rendered h1::before,
+body.lick-hi-dot .HyperMD-header-1::before { background-color: var(--h1-color); }
+body.lick-hi-dot .markdown-rendered h2::before,
+body.lick-hi-dot .HyperMD-header-2::before { background-color: var(--h2-color); }
+body.lick-hi-dot .markdown-rendered h3::before,
+body.lick-hi-dot .HyperMD-header-3::before { background-color: var(--h3-color); }
+body.lick-hi-dot .markdown-rendered h4::before,
+body.lick-hi-dot .HyperMD-header-4::before { background-color: var(--h4-color); }
+body.lick-hi-dot .markdown-rendered h5::before,
+body.lick-hi-dot .HyperMD-header-5::before { background-color: var(--h5-color); }
+body.lick-hi-dot .markdown-rendered h6::before,
+body.lick-hi-dot .HyperMD-header-6::before { background-color: var(--h6-color); }
+
+/* ---- Heading indicator: Border ---- */
+
+body.lick-hi-border .markdown-rendered :is(h1, h2, h3, h4, h5, h6)::before,
+body.lick-hi-border .HyperMD-header::before {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: 0.14em;
+  bottom: 0.14em;
+  width: 3px;
+  border-radius: 2px;
+  background-color: currentColor;
+  opacity: 0.85;
+}
+
+body.lick-hi-border .markdown-rendered h1::before,
+body.lick-hi-border .HyperMD-header-1::before { background-color: var(--h1-color); }
+body.lick-hi-border .markdown-rendered h2::before,
+body.lick-hi-border .HyperMD-header-2::before { background-color: var(--h2-color); }
+body.lick-hi-border .markdown-rendered h3::before,
+body.lick-hi-border .HyperMD-header-3::before { background-color: var(--h3-color); }
+body.lick-hi-border .markdown-rendered h4::before,
+body.lick-hi-border .HyperMD-header-4::before { background-color: var(--h4-color); }
+body.lick-hi-border .markdown-rendered h5::before,
+body.lick-hi-border .HyperMD-header-5::before { background-color: var(--h5-color); }
+body.lick-hi-border .markdown-rendered h6::before,
+body.lick-hi-border .HyperMD-header-6::before { background-color: var(--h6-color); }
+
+/* The fold arrow shares this margin slot — app.css puts it at
+   margin-inline-start: -22px (-20px on mobile) and only reveals it on hover
+   or while collapsed. Rather than fight it for the space (there isn't room
+   for both, least of all on mobile), the marker steps aside while the arrow
+   is showing. */
+.markdown-rendered :is(h1, h2, h3, h4, h5, h6)::before,
+.HyperMD-header::before {
+  transition: opacity var(--anim-duration-fast) var(--lick-ease);
+}
+
+body:is(.lick-hi-dot, .lick-hi-border) .markdown-rendered
+  :is(h1, h2, h3, h4, h5, h6):hover::before,
+body:is(.lick-hi-dot, .lick-hi-border) .markdown-rendered
+  :is(h1, h2, h3, h4, h5, h6).is-collapsed::before,
+body:is(.lick-hi-dot, .lick-hi-border) .HyperMD-header:hover::before,
+body:is(.lick-hi-dot, .lick-hi-border) .cm-line:hover .HyperMD-header::before {
+  opacity: 0;
+}
+
+/* Never draw an indicator over the title/inline-title */
+.inline-title::before {
+  display: none !important;
+}
+
+.inline-title {
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+
+/* ============================================================================
+   7. Checkboxes, toggles, controls
+   ========================================================================= */
+
+body {
+  --checkbox-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --checkbox-color-hover: hsl(var(--accent-h), var(--accent-s), calc(var(--accent-l) - 6%));
+  --checkbox-border-color: var(--color-base-40);
+  --checkbox-border-color-hover: var(--color-base-50);
+  --checkbox-marker-color: #fff;
+  --checklist-done-color: var(--text-faint);
+  --checklist-done-decoration: line-through;
+}
+
+input[type="checkbox"] {
+  border: 1.5px solid var(--checkbox-border-color);
+  background-color: transparent;
+  transition: background-color var(--anim-duration-fast) var(--lick-ease),
+    border-color var(--anim-duration-fast) var(--lick-ease),
+    transform var(--anim-duration-fast) var(--lick-ease);
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--checkbox-color);
+}
+
+input[type="checkbox"]:active {
+  transform: scale(0.9);
+}
+
+/* Rectangle (macOS) — the default */
+body.lick-checkbox-rect {
+  --checkbox-radius: 5px;
+}
+
+/* Circular (Reminders on iOS) */
+body.lick-checkbox-circle {
+  --checkbox-radius: 50%;
+}
+
+body.lick-checkbox-circle input[type="checkbox"] {
+  border-radius: 50%;
+}
+
+/* iOS toggle switch */
+body {
+  --toggle-border-width: 2px;
+  --toggle-width: 42px;
+  --toggle-thumb-color: #fff;
+  --toggle-thumb-height: 22px;
+  --background-modifier-active-hover: var(--background-modifier-hover);
+}
+
+.checkbox-container {
+  box-shadow: none;
+  background-color: var(--lick-fill-strong);
+  transition: background-color 200ms var(--lick-ease);
+}
+
+.checkbox-container:after {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.checkbox-container.is-enabled {
+  background-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+}
+
+/* Buttons — macOS control geometry.
+   `:not(.clickable-icon)` mirrors how app.css scopes its own button styling.
+   Icon buttons are bare glyphs, and Obsidian builds a lot of mobile chrome
+   out of them — view-header actions, navbar actions and the drawer icons are
+   all `<button class="clickable-icon">`. A blanket `button` rule handed every
+   one of those an `--input-shadow`, which read as a drop shadow under each
+   icon in the mobile header pill. */
+button:not(.clickable-icon),
+.mod-cta,
+input[type="submit"] {
+  border: none;
+  border-radius: var(--button-radius);
+  font-weight: 500;
+  letter-spacing: -0.008em;
+  box-shadow: var(--input-shadow);
+  transition: background-color var(--anim-duration-fast) var(--lick-ease),
+    transform var(--anim-duration-fast) var(--lick-ease);
+}
+
+button:not(.clickable-icon):active,
+.mod-cta:active {
+  transform: scale(0.97);
+}
+
+button.mod-cta {
+  background-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  color: var(--text-on-accent);
+}
+
+/* Inputs — iOS/macOS rounded fields, no borders */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select,
+.dropdown {
+  border: none;
+  background-color: var(--background-modifier-form-field);
+  border-radius: var(--input-radius);
+  box-shadow: none;
+  transition: box-shadow var(--anim-duration-fast) var(--lick-ease);
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.dropdown:focus {
+  box-shadow: 0 0 0 3px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.28);
+  outline: none;
+}
+
+.search-input-container input {
+  border-radius: 9px;
+}
+
+/* Sliders */
+input[type="range"] {
+  --slider-track-background: var(--lick-fill-strong);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.22), 0 1px 1px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border: none;
+}
+
+/* Scrollbars — overlay style */
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ============================================================================
+   8. Floating surfaces — menus, modals, popovers, prompts
+   ========================================================================= */
+
+.menu,
+.suggestion-container,
+.popover.hover-popover,
+.tooltip .tooltip-content,
+.modal,
+.prompt {
+  border: none;
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-l);
+}
+
+.menu,
+.suggestion-container,
+.prompt {
+  background-color: var(--lick-floating);
+  -webkit-backdrop-filter: var(--lick-blur);
+  backdrop-filter: var(--lick-blur);
+  padding: 5px;
+}
+
+.menu-item {
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: var(--font-ui-small);
+}
+
+.menu-item:hover,
+.menu-item.selected {
+  background-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  color: var(--text-on-accent);
+}
+
+.menu-item:hover .menu-item-icon,
+.menu-item.selected .menu-item-icon {
+  color: var(--text-on-accent);
+}
+
+.menu-separator {
+  border: none;
+  height: 1px;
+  background-color: var(--lick-separator);
+  margin: 4px 8px;
+}
+
+/* Quick switcher / command palette — Spotlight */
+.prompt {
+  border-radius: var(--radius-xl);
+  padding: 0;
+  overflow: hidden;
+}
+
+.prompt-input-container input,
+.prompt-input {
+  background-color: transparent;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  padding: 18px 20px;
+  height: auto;
+}
+
+.prompt-input:focus {
+  box-shadow: none;
+}
+
+.prompt-results {
+  padding: 6px;
+}
+
+.suggestion-item {
+  border-radius: 8px;
+  padding: 7px 12px;
+}
+
+.suggestion-item.is-selected {
+  background-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  color: var(--text-on-accent);
+}
+
+.suggestion-item.is-selected .suggestion-note,
+.suggestion-item.is-selected .suggestion-flair {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Modals & settings */
+.modal-bg {
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.28);
+}
+
+.modal {
+  background-color: var(--lick-elevated);
+  border-radius: var(--radius-l);
+}
+
+.modal-title {
+  font-weight: 640;
+  letter-spacing: -0.015em;
+}
+
+.modal-close-button {
+  border-radius: 50%;
+}
+
+.vertical-tab-header,
+.vertical-tab-nav-item {
+  border: none;
+}
+
+.vertical-tab-nav-item {
+  border-radius: 7px;
+  margin: 0 6px;
+  padding: 6px 10px;
+  font-size: var(--font-ui-small);
+}
+
+.vertical-tab-nav-item.is-active {
+  background-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.14);
+  color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  font-weight: 590;
+}
+
+/* Each setting is a card in current Obsidian: background, radius, and
+   `padding: var(--size-4-4)` on all sides, with section headings inset by the
+   same amount so their text lines up with the text inside the cards. Don't
+   override the padding — zeroing the sides pushes every label flat against
+   the card edge and breaks that alignment. Cards also need no separator
+   between them. */
+.setting-item {
+  border: none;
+}
+
+.setting-item-name {
+  font-weight: 500;
+}
+
+/* ---- Style Settings plugin ----------------------------------------------
+   The plugin separates its sections with
+   `border-bottom: 1px solid var(--background-modifier-border)`, which this
+   theme sets to transparent — so the groups lose their separation and run
+   together with no inset. Spacing does that job here instead, and nested
+   containers get the indent the plugin only applies at level 0. */
+
+/* Vertical padding only — the horizontal padding comes from app.css
+   (`.setting-item-heading { padding: 0 var(--size-4-4) }`) and is what keeps
+   heading text aligned with the text inside the cards below it. */
+.style-settings-heading {
+  border-bottom: none;
+  padding-top: 14px;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.style-settings-heading[data-level="0"] {
+  margin-bottom: 10px;
+}
+
+.style-settings-heading .setting-item-name {
+  font-weight: 640;
+  letter-spacing: -0.01em;
+}
+
+.style-settings-heading[data-level="0"] .setting-item-name {
+  font-size: var(--font-ui-medium);
+}
+
+/* Containers contribute no indent of their own. The plugin indents level-0
+   containers by 34px, which offsets every card from the section heading above
+   it; with a flat container the heading and card text share one left edge,
+   the way Obsidian's own settings pages read. */
+.style-settings-container,
+.style-settings-heading[data-level="0"] + .style-settings-container {
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 12px;
+}
+
+.style-settings-collapse-indicator {
+  color: var(--text-faint);
+}
+
+/* Colour swatches and reset buttons sit on the row's right edge */
+.style-settings-container .setting-item-control .pcr-button {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* Hover popover / page preview */
+.popover.hover-popover {
+  background-color: var(--lick-elevated);
+  border-radius: var(--radius-l);
+}
+
+/* Tooltips — iOS style */
+.tooltip .tooltip-content {
+  background-color: var(--background-modifier-message);
+  border-radius: 8px;
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.tooltip .tooltip-arrow {
+  display: none;
+}
+
+/* Status bar */
+.status-bar {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+}
+
+.status-bar-item {
+  color: var(--text-faint);
+}
+
+/* Notices — iOS banner */
+.notice {
+  background-color: var(--lick-floating);
+  -webkit-backdrop-filter: var(--lick-blur);
+  backdrop-filter: var(--lick-blur);
+  color: var(--text-normal);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-l);
+  border: none;
+  font-size: var(--font-ui-small);
+  padding: 12px 16px;
+}
+
+/* Graph, canvas & misc surfaces */
+.canvas-node-container,
+.canvas-node-content {
+  border-radius: var(--radius-m);
+}
+
+.canvas-controls-group,
+.canvas-card-menu {
+  border: none;
+  border-radius: var(--radius-m);
+  background-color: var(--lick-floating);
+  -webkit-backdrop-filter: var(--lick-blur-light);
+  backdrop-filter: var(--lick-blur-light);
+  box-shadow: var(--shadow-s);
+}
+
+/* ============================================================================
+   9. Mobile & tablet — iOS / iPadOS
+   ========================================================================= */
+
+body.is-mobile {
+  --font-ui-small: 14px;
+  --font-ui-medium: 16px;
+  --font-ui-large: 18px;
+  --nav-item-size: 17px;
+  --nav-item-padding: 10px 14px 10px 26px;
+  --nav-item-weight: 400;
+  --swipe-color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --radius-l: 16px;
+  --radius-xl: 22px;
+  --input-height: 40px;
+  --checkbox-size: 20px;
+  --icon-size: 22px;
+}
+
+body.is-phone {
+  --file-line-width: 100%;
+}
+
+/* Mobile dark reuses the border colour as an interactive fill —
+   `.is-mobile.theme-dark` aliases `--interactive-normal:
+   var(--background-modifier-border)` — and this theme sets that border to
+   `transparent` for its borderless brief. The two collide: every
+   `--interactive-normal` surface on mobile dark had no background at all,
+   including buttons and the iPad navigation selector's dropdown, which is
+   absolutely positioned over the file tree and so showed the tree through
+   itself. Give them a real elevated surface instead.
+
+   Light needs the same treatment, for a different reason. app.css does alias
+   `--interactive-normal` to `--background-secondary` on `.is-mobile` — but that
+   is (0,1,0), exactly the same as this theme's own `.theme-light`, and
+   theme.css loads *after* app.css, so the palette's `rgba(0, 0, 0, 0.04)` won
+   on source order and the alias never applied. Measured: the open navigation
+   selector was a 4% black film with the file tree and its toolbar legible
+   straight through it. Equal specificity is not a tie — later wins.
+
+   These must be declared on `body`, not on the drawer. Graphite light puts a
+   dark sidebar next to light content and re-declares `--interactive-normal` on
+   the sidebar containers themselves; custom properties resolve by inheritance,
+   so a `body`-level value is simply overridden by the nearer drawer rule and
+   Graphite keeps its dark dropdown. Scoping this to `.workspace-drawer` instead
+   would compete with that rule on the same element, win on specificity, and put
+   a white list under Graphite's light sidebar text. */
+body.is-mobile.theme-dark {
+  --interactive-normal: var(--lick-elevated);
+  --interactive-hover: var(--color-base-30);
+}
+
+body.is-mobile.theme-light {
+  --interactive-normal: var(--lick-elevated);
+  --interactive-hover: var(--color-base-25);
+}
+
+/* The list floats over the file tree, so it needs to read as a layer and not
+   just as an opaque patch. Phones are left alone: app.css gives them
+   `box-shadow: 0 -12px 12px 0 var(--mobile-sidebar-background)`, which is not
+   decoration but a mask — the phone list opens *upward*, and that shadow hides
+   the tree above it. Overriding it there would reintroduce the bug at the top
+   edge. */
+body.is-tablet .workspace-drawer-tab-options-list {
+  box-shadow: var(--shadow-l);
+}
+
+/* Drawers become iOS sidebars */
+.is-mobile .workspace-drawer {
+  background-color: var(--background-secondary);
+  box-shadow: none;
+  border: none;
+}
+
+.is-mobile .workspace-drawer-inner {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.is-mobile .workspace-drawer-header,
+.is-mobile .workspace-drawer-header-info {
+  border: none;
+}
+
+.is-mobile .workspace-drawer-header-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.is-mobile .workspace-drawer-active-tab-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.is-mobile .nav-file-title,
+.is-mobile .nav-folder-title,
+.is-mobile .tree-item-self {
+  border-radius: 10px;
+}
+
+/* Backdrop behind an open drawer */
+.is-mobile .workspace-drawer-backdrop {
+  background-color: rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* Top view header — on mobile the buttons float in their own pills, so the
+   header itself is just a transparent rail.
+   It must not be painted *or* blurred: the element is full-width, so a
+   background or a backdrop-filter both show up as a tinted strip across the
+   window. On phones Obsidian already forces the background transparent
+   (`.is-mobile.is-floating-nav.is-phone .view-header`, 0,3,0) but has no say
+   over a backdrop-filter, so the blur alone was drawing the strip; on tablets
+   the chrome fill won outright and greyed the whole row. Content scrolling
+   underneath is handled by Obsidian's own `--view-top-fade-mask`. */
+.is-mobile .view-header {
+  background-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Vault selector — part of the sidebar, not a separate bar. app.css gives it
+   no background of its own; painting it broke the run of the sidebar. */
+.is-mobile .workspace-drawer-header {
+  background-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+}
+
+.is-mobile .view-header-title-container {
+  font-weight: 590;
+}
+
+/* Bottom navigation bar + editing toolbar — the signature iOS blur */
+.is-mobile .mobile-navbar,
+.is-mobile .mobile-toolbar,
+.is-mobile .mobile-toolbar-options-container {
+  background-color: var(--lick-chrome);
+  -webkit-backdrop-filter: var(--lick-blur);
+  backdrop-filter: var(--lick-blur);
+  border: none;
+  box-shadow: none;
+}
+
+/* No safe-area padding here. app.css already ends the navbar's padding
+   shorthand with `--navbar-bottom-offset`, which *is*
+   `max(safe-area-inset-bottom, 12px)`, and zeroes it again in floating-nav
+   mode. Adding it back counted the home-indicator inset twice inside a fixed
+   52px pill, squeezing the icons up against the top edge. */
+.is-mobile .mobile-navbar-action {
+  color: var(--text-muted);
+  border-radius: 10px;
+  gap: 3px;
+  font-size: 10px;
+}
+
+.is-mobile .mobile-navbar-action.is-active,
+.is-mobile .mobile-navbar-action:active {
+  color: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+}
+
+.is-mobile .mobile-toolbar-option {
+  border-radius: 9px;
+  color: var(--text-normal);
+}
+
+.is-mobile .mobile-toolbar-option:active {
+  background-color: var(--background-modifier-hover);
+}
+
+/* Floating action buttons — accent-tinted so they read as a control at a
+   glance, still translucent over whatever scrolls beneath them. */
+.is-mobile .floating-action-button,
+.is-mobile .mobile-fab,
+.is-mobile .clickable-icon.mod-floating {
+  background-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.92);
+  -webkit-backdrop-filter: var(--lick-blur);
+  backdrop-filter: var(--lick-blur);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 6px 20px hsla(var(--accent-h), var(--accent-s), 30%, 0.36),
+    0 2px 6px rgba(0, 0, 0, 0.18);
+  /* Not `#fff`. Every other accent-filled control reads `--text-on-accent`, and
+     a flavour with a pale accent — Catppuccin Mocha's mauve is 81% lightness —
+     needs a dark glyph here or the button is unreadable. The three palettes
+     that set white keep it. */
+  color: var(--text-on-accent);
+}
+
+.is-mobile .floating-action-button:active,
+.is-mobile .mobile-fab:active {
+  transform: scale(0.94);
+}
+
+/* Raised icon chips are circles, the way iOS draws a floating glyph button.
+   These are the square ones: `addHeaderButton` builds the drawer's settings,
+   pin and sync icons as `clickable-icon workspace-drawer-header-icon
+   mod-raised` at `--touch-size-m` both ways, and `.modal-close-button`
+   overrides `.clickable-icon`'s uneven 4px/6px padding with a flat 4px (44px
+   square on phones). So 50% gives a true circle, not an ellipse.
+
+   Listed explicitly rather than hung off `.clickable-icon.mod-raised`, even
+   though every one of these carries that pair — the family is *not* uniformly
+   square. `.modal-setting-back-button` is only sized (44px) by an `.is-phone`
+   rule; on tablet it is an unsized flex box that measured 486×33, so the
+   family selector turned it into an ellipse. It is scoped to phones here for
+   that reason. The other raised elements — navbar, phone view-action group,
+   toolbar options, canvas controls — are wide bars that must stay pills.
+   Nothing is needed for the phone view header's own actions: app.css already
+   rounds them by `--view-header-height` on a square box. `mod-raised::after`,
+   the iOS edge mask, inherits `border-radius` and follows on its own.
+
+   Don't "centre" the drawer icon by zeroing app.css's `padding-top` — that 4px
+   is balanced against the 4px `padding-bottom` `.clickable-icon` already sets,
+   and removing it pushes the glyph 2px above the middle of the circle. */
+body.is-mobile .workspace-drawer-header-icon,
+body.is-mobile .modal-close-button,
+body.is-phone .modal-setting-back-button {
+  border-radius: 50%;
+}
+
+.is-mobile .canvas-controls-group {
+  background-color: var(--lick-floating);
+  -webkit-backdrop-filter: var(--lick-blur);
+  backdrop-filter: var(--lick-blur);
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--shadow-l);
+}
+
+/* Mobile menus & sheets — iOS action sheet geometry */
+.is-mobile .menu {
+  border-radius: 16px;
+  background-color: var(--lick-floating);
+  -webkit-backdrop-filter: var(--lick-blur);
+  backdrop-filter: var(--lick-blur);
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* No border-radius on the item. On phones an action-sheet group is one block:
+   app.css sets every `.is-phone .menu-item` to radius 0 and rounds only the
+   first and last item of a `.menu-group`. A radius on the item itself has the
+   same specificity (0,2,0) and loads later, so it won — rounding the inner
+   corners too and scalloping the seams between rows. Tablet menus are
+   popovers, and keep the 6px item radius from section 8. */
+.is-mobile .menu-item {
+  padding: 11px 14px;
+  font-size: 17px;
+}
+
+.is-mobile .modal {
+  border-radius: 18px;
+}
+
+.is-mobile .prompt {
+  border-radius: 18px;
+}
+
+/* Tablet: iPadOS keeps the desktop-ish split with roomier targets.
+   Left padding matches the 26px indicator allowance from section 3 — this rule
+   sets the shorthand, so it would otherwise reset the left inset back to 14px
+   and clip the chevron against the viewport edge. */
+.is-tablet .nav-file-title,
+.is-tablet .nav-folder-title {
+  padding: 8px 14px 8px 26px;
+}
+
+.is-tablet {
+  --file-line-width: 680px;
+}
+
+/* The strip above the tab bar is the iPadOS status-bar area: app.css paints
+   `.is-mobile .workspace > .mod-root` with `--system-status-background`, which
+   on tablet it aliases to `--titlebar-background`. That's pinned to the
+   sidebar chrome for the sake of the macOS traffic lights (see section 2), so
+   on iPad it put a grey band across the top of the note. There are no traffic
+   lights here — it belongs to the note, so it takes the primary background.
+   `body.is-tablet` (0,1,1) to outrank app.css's `.is-tablet` (0,1,0). */
+body.is-tablet {
+  --system-status-background: var(--background-primary);
+}
+
+/* The sidebar reads as chrome, not as note. app.css paints the whole drawer
+   surface — `.workspace-drawer`, `-inner`, `-active-tab-container`, the action
+   row and the scroll fades — from `--mobile-sidebar-background`, and declares
+   it as `--background-primary` on `.is-mobile` but as `--background-secondary`
+   on `.is-mobile.theme-dark`. So dark already matched the desktop sidebar while
+   light came out white, flush with the note. Setting the one variable covers
+   every one of those surfaces at once; `.theme-light` keeps dark on Obsidian's
+   own value, and `body.is-tablet.theme-light` (0,2,1) outranks `.is-mobile`
+   (0,1,0). Going through `--background-secondary` rather than a hex means
+   flavours pick up their own sidebar tint for free.
+   Phones are deliberately left alone: there the drawer is a sheet that slides
+   over the note, and Obsidian's white reads correctly against the dimmed
+   backdrop. */
+body.is-tablet.theme-light {
+  --mobile-sidebar-background: var(--background-secondary);
+}
+
+/* Restore the sidebar's 12px edge inset on tablet. app.css replaces the left
+   padding of the pinned left drawer with `--ribbon-width` (0px when the ribbon
+   is hidden) at 0,3,1, which beats the theme's generic
+   `.workspace-drawer-inner` rule in section 3 — so the file tree sat flush to
+   the window edge and the folder collapse indicator, which is absolutely
+   positioned 20px into the item's left padding, was clipped 6px off-screen.
+   Keep the ribbon allowance in the calc so a shown ribbon still clears. */
+body.is-tablet .workspace-drawer.mod-left .workspace-drawer-inner {
+  padding-left: calc(var(--ribbon-width) + 12px);
+}
+
+/* The file explorer toolbar's scrim must span the toolbar, not sit inside it.
+   With a floating nav, app.css drops the toolbar's own background and paints a
+   `.nav-buttons-container:after` gradient instead — but sizes it
+   `width: calc(100% - var(--size-4-6)); margin: 0 auto`, leaving 12px bare at
+   each end. That is invisible in stock Obsidian only because its drawer keeps
+   the toolbar inset 16px from the file tree; here section 3 zeroes the drawer's
+   `.nav-header` padding, so the toolbar and the tree share one content box and
+   file rows scrolled up through those two uncovered strips.
+   Widening the scrim is the right lever rather than re-inseting the toolbar:
+   the tree's 12px edge inset already comes from `.workspace-drawer-inner`, so a
+   full-width scrim lands exactly on the scrolling column. app.css's rule is
+   (0,4,1), so the `body` prefix is needed to win — and the phone variant
+   (0,5,1) only restyles top/height/background, so this covers both. */
+body.is-mobile.is-floating-nav
+  .workspace-drawer
+  .nav-buttons-container::after {
+  width: 100%;
+  margin: 0;
+}
+
+/* ---- True OLED black (Style Settings, mobile + dark only) ---- */
+
+body.lick-oled.is-mobile.theme-dark {
+  --color-base-00: #000000;
+  --color-base-05: #0a0a0b;
+  --color-base-10: #0e0e0f;
+  --color-base-20: #000000;
+  --color-base-25: #131315;
+  --background-primary: #000000;
+  --background-primary-alt: #0a0a0b;
+  --background-secondary: #000000;
+  --background-secondary-alt: #000000;
+  --lick-chrome: rgba(10, 10, 11, 0.7);
+  --lick-chrome-solid: #000000;
+  --lick-floating: rgba(28, 28, 30, 0.78);
+  --lick-elevated: #1c1c1e;
+  --code-background: rgba(255, 255, 255, 0.07);
+}
+
+body.lick-oled.is-mobile.theme-dark .workspace,
+body.lick-oled.is-mobile.theme-dark .workspace-drawer,
+body.lick-oled.is-mobile.theme-dark .workspace-leaf-content,
+body.lick-oled.is-mobile.theme-dark .markdown-source-view,
+body.lick-oled.is-mobile.theme-dark .markdown-preview-view {
+  background-color: #000000;
+}
+
+/* ============================================================================
+   10. Bases
+   ========================================================================= */
+
+/* Bases is driven almost entirely by variables, and the ones that separate its
+   surfaces resolve to --background-modifier-border — which this theme sets to
+   transparent. A card's default elevation is `0 0 0 1px
+   var(--background-modifier-border)`, so under Lick every card was a 1px ring
+   in a colour that isn't there: text floating directly on the page. Separation
+   here is surface colour alone — no shadow, no border — which is why the light
+   and dark cards move in opposite directions from the page behind them. */
+body {
+  /* Cards */
+  --bases-cards-radius: var(--radius-l);
+  --bases-cards-background: var(--lick-card-background);
+  --bases-cards-cover-background: var(--lick-fill);
+  --bases-cards-shadow: none;
+  --bases-cards-shadow-hover: none;
+
+  /* Table view — matches the markdown table treatment in section 5 */
+  --bases-table-header-weight: 640;
+  --bases-table-container-border-radius: var(--radius-m);
+
+  /* An embedded base is a block in a note, so it takes the block radius */
+  --bases-embed-border-radius: var(--radius-m);
+}
+
+/* With no shadow to deepen, hover is a step in the card's own tint.
+   `.bases-cards-item` is absolutely positioned by the virtualiser and
+   `contain: strict`, so nothing here may touch its box — background-color is
+   safe, geometry is not. app.css re-declares `transition` in its own :hover
+   rule, which outranks the base rule below, so the transition has to be
+   repeated there or the tint only animates on the way out. */
+.bases-cards-item {
+  transition: background-color var(--anim-duration-fast) var(--lick-ease);
+}
+
+@media (hover: hover) {
+  .bases-cards-item:hover {
+    background-color: var(--lick-card-background-hover);
+    transition: background-color var(--anim-duration-fast) var(--lick-ease);
+  }
+}
+
+/* Grouped cards are divided by a rule painted in --background-modifier-border,
+   i.e. nothing. The separator colour is the one hairline this theme allows. */
+.is-grouped .bases-cards-container .bases-cards-group {
+  border-color: var(--lick-separator);
+}
+
+/* ============================================================================
+   11. Accessibility & motion
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Focus rings follow macOS: a soft accent halo, never a hard border.
+   Scoped to actual controls — as a universal rule this also haloed the
+   editor itself, which takes focus the moment you start typing. Obsidian
+   clears the editor's `outline` but not a `box-shadow`, so a blanket
+   :focus-visible leaves a ring around the whole text area in edit mode. */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.dropdown:focus-visible,
+.clickable-icon:focus-visible,
+.checkbox-container:focus-visible,
+.menu-item:focus-visible,
+.suggestion-item:focus-visible,
+.nav-file-title:focus-visible,
+.nav-folder-title:focus-visible,
+.workspace-tab-header:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.35);
+  border-radius: var(--radius-s);
+}
+
+/* Writing surfaces never get a ring */
+.cm-editor,
+.cm-editor.cm-focused,
+.cm-content,
+.cm-scroller,
+.cm-line,
+.markdown-source-view,
+.markdown-preview-view,
+.markdown-rendered,
+.view-content,
+.inline-title,
+.metadata-input-longtext {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ============================================================================
+   12. Print & PDF export
+   ========================================================================= */
+
+/* Obsidian renders output into a separate `.print` container and hides
+   everything else (`body > :not(.print)`), so none of the chrome above ever
+   reaches paper. This section only has to deal with the note itself.
+
+   Two rules in app.css shape the problem. `-webkit-print-color-adjust: exact`
+   means every background this theme paints is reproduced rather than dropped to
+   save ink; and `color: initial` on the preview forces body text to black while
+   leaving every descendant colour untouched. In dark mode that pairing prints
+   black text onto a dark page.
+
+   So print re-runs the light ramp. Callout fills, code and table washes and the
+   heading colours are all derived from these variables, so restating them is
+   enough to bring the whole note back to paper without restyling any of it.
+   Only the values that aren't already derived need repeating —
+   `--background-primary` and friends resolve through `var(--color-base-*)` and
+   follow on their own.
+
+   The selector carries two classes so it outranks the dark flavour palettes
+   (also 0,2,0) declared earlier in the file; `[class]` is the second one. */
+
+@media print {
+  .theme-dark[class] {
+    --color-base-00: #ffffff;
+    --color-base-05: #fcfcfd;
+    --color-base-10: #f7f7f9;
+    --color-base-20: #f0f0f3;
+    --color-base-25: #e9e9ed;
+    --color-base-30: #e1e1e6;
+    --color-base-35: #d8d8de;
+    --color-base-40: #cfcfd6;
+    --color-base-50: #aeaeb2;
+    --color-base-60: #8e8e93;
+    --color-base-70: #636366;
+    --color-base-100: #1d1d1f;
+
+    --color-red: var(--apple-red);
+    --color-orange: var(--apple-orange);
+    --color-yellow: #f0b400;
+    --color-green: var(--apple-green);
+    --color-cyan: var(--apple-teal);
+    --color-blue: var(--apple-blue);
+    --color-purple: var(--apple-purple);
+    --color-pink: var(--apple-pink);
+
+    /* Dark lifts this to 52% for contrast against a dark page; on paper it
+       goes back to the base value. */
+    --accent-l: 50%;
+
+    /* The two backgrounds light mode doesn't derive the same way as dark. */
+    --background-primary-alt: var(--color-base-10);
+    --background-secondary-alt: var(--color-base-25);
+
+    --background-modifier-hover: rgba(0, 0, 0, 0.045);
+    --background-modifier-active-hover: rgba(0, 0, 0, 0.07);
+    --background-modifier-form-field: rgba(0, 0, 0, 0.045);
+
+    --text-normal: #1d1d1f;
+    --text-muted: rgba(60, 60, 67, 0.68);
+    --text-faint: rgba(60, 60, 67, 0.42);
+    --text-highlight-bg: rgba(255, 214, 10, 0.45);
+
+    /* Every wash below is a translucent overlay keyed to the page behind it.
+       Dark mode tints with white, which disappears on paper. */
+    --divider-color: rgba(60, 60, 67, 0.16);
+    --hr-color: rgba(60, 60, 67, 0.16);
+    --code-background: rgba(0, 0, 0, 0.045);
+    --table-header-background: rgba(0, 0, 0, 0.035);
+    --table-row-alt-background: rgba(0, 0, 0, 0.022);
+
+    --lick-elevated: #ffffff;
+    --lick-separator: rgba(60, 60, 67, 0.14);
+    --lick-fill: rgba(120, 120, 128, 0.12);
+    --lick-fill-strong: rgba(120, 120, 128, 0.2);
+    --lick-card-background: var(--color-base-10);
+  }
+
+  /* ---- Paper, both modes ---------------------------------------------- */
+
+  /* app.css paints the preview but not the sheet behind it, so a note shorter
+     than the page leaves the container's own colour showing below the text. */
+  .print,
+  .print .markdown-preview-view {
+    background-color: var(--background-primary);
+  }
+
+  /* A fenced block scrolls sideways on screen. Paper has nowhere to scroll to,
+     so a long line is simply cut off at the page edge — wrap it instead. */
+  .print pre,
+  .print pre > code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: visible;
+  }
+
+  /* Separation in this theme is surface colour, so a card split across two
+     pages reads as two unrelated blocks rather than one interrupted. Keep the
+     ones small enough to move whole. */
+  .print :is(pre, table, blockquote, figure, img, .callout, .markdown-embed) {
+    break-inside: avoid;
+  }
+
+  /* A heading stranded at the foot of a page. */
+  .print :is(h1, h2, h3, h4, h5, h6) {
+    break-after: avoid;
+  }
+
+  .print :is(p, li) {
+    orphans: 3;
+    widows: 3;
+  }
+}

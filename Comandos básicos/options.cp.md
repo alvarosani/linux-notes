@@ -1,0 +1,13 @@
+Volver > [[Linux Comandos Básicos]]
+	-r copia carpetas y su contenido
+	-i pregunta antes de sobrescribir
+	-v muestra lo que va copiando
+	-n no sobrescribe archivos existentes
+	-u copia solo si el origen es mas nuevo o el destino no existe
+	-p conserva permisos, propietario y fechas
+	-a copia recursiva, conservando todo
+	-f fuerza la copia si el destino no se puede abrir
+	-l crea enlaces duros en ves de copiar el contenido
+	-s crea enlaces simbólicos en vez de copiar
+	-b crea una copia de seguridad
+	-t DIR | indica primero y destino y luego el origen

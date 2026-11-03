@@ -1,0 +1,11 @@
+Volver > [[Linux Comandos Básicos]]
+-l muestra los números de línea
+-v solo lectura
+-m activa el uso del ratón
+-B guarda una copia de seguridad
+-i mantiene la sangría de la lineal anterior
+-E convierte los tabuladores en espacios
+-T fija el ancho del tabulador en N columnas
+-c muestra siempre la posición del ratón
+-x oculta la ayuda de la parte inferior
+--version muestra la versión

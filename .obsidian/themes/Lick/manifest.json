@@ -1,0 +1,8 @@
+{
+  "name": "Lick",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "author": "Brendan Clarke",
+  "authorUrl": "https://www.brendan.me",
+  "description": "An Apple-inspired theme with real translucency and no hard lines. Four flavours, full light and dark, and native-feeling chrome on macOS, iPadOS and iOS."
+}
